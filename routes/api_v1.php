@@ -1,6 +1,7 @@
 <?php
 
 use App\Infrastructure\Http\Controllers\V1\AuthController;
+use App\Infrastructure\Http\Controllers\V1\ExerciseController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -12,4 +13,15 @@ Route::prefix('auth')->group(function () {
     Route::post('email/resend', [AuthController::class, 'resend']);
     Route::post('password/email', [AuthController::class, 'requestPasswordReset']);
     Route::post('password/reset', [AuthController::class, 'resetPassword']);
+});
+
+// Exercise routes - require authentication and trainer role
+Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
+    Route::get('exercises', [ExerciseController::class, 'index']);
+    Route::get('exercises/{id}', [ExerciseController::class, 'show']);
+    Route::post('exercises', [ExerciseController::class, 'store']);
+    Route::put('exercises/{id}', [ExerciseController::class, 'update']);
+    Route::delete('exercises/{id}', [ExerciseController::class, 'destroy']);
+    Route::put('exercises/{id}/toggle', [ExerciseController::class, 'toggle']);
+    Route::get('muscle-groups', [ExerciseController::class, 'muscleGroups']);
 });

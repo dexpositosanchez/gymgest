@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libpq-dev \
-    redis-tools
+    redis-tools \
+    postgresql-client
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -39,14 +40,17 @@ RUN composer install --no-dev --optimize-autoloader
 # Generate JWT secret if not exists
 RUN php artisan jwt:secret --force || true
 
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Set permissions
 RUN chown -R www-data:www-data \
     /var/www/storage \
     /var/www/bootstrap/cache
 
-# Change current user to www
-USER www-data
-
-# Expose port 9000 and start php-fpm server
+# Expose port 9000
 EXPOSE 9000
-CMD ["php-fpm"]
+
+# Use entrypoint to run migrations and start php-fpm
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
