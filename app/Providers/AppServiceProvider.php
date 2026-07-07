@@ -6,10 +6,12 @@ use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\Exercise\Repositories\ExerciseRepositoryInterface;
 use App\Domain\Exercise\Repositories\MuscleGroupRepositoryInterface;
 use App\Domain\Exercise\Repositories\TrainerExercisePreferenceRepositoryInterface;
+use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
 use App\Infrastructure\Persistence\Eloquent\UserEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\ExerciseEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\MuscleGroupEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\TrainerExercisePreferenceEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\RoutineEloquentRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -41,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             TrainerExercisePreferenceRepositoryInterface::class,
             TrainerExercisePreferenceEloquentRepository::class
+        );
+
+        // Routine repositories
+        $this->app->bind(
+            RoutineRepositoryInterface::class,
+            RoutineEloquentRepository::class
         );
     }
 
