@@ -891,6 +891,679 @@
                 ]
             }
         },
+        "/gyms": {
+            "get": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "List gyms",
+                "operationId": "8cf082eee626feb79ed8fd2b340ee8a7",
+                "parameters": [
+                    {
+                        "name": "include_inactive",
+                        "in": "query",
+                        "description": "Include inactive gyms",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gym list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Only trainers allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Create gym",
+                "operationId": "c11085fe3b3e9eeeeedbd322e7c97b05",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "locality",
+                                    "province",
+                                    "country"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "locality": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "province": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Gym created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Only trainers allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/gyms/{id}": {
+            "get": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Get gym details",
+                "operationId": "5baa0e08a000a71318a8224167960dbf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gym details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gym not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Update gym",
+                "operationId": "a6dcd0f566fc83f47ccf9685ccd70ec3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "locality",
+                                    "province",
+                                    "country"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "locality": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "province": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Gym updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gym not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Delete gym",
+                "operationId": "1c8b0cde3235e7923677714942a1a69c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Gym deleted"
+                    },
+                    "404": {
+                        "description": "Gym not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/gyms/{id}/toggle": {
+            "put": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Toggle gym active status",
+                "operationId": "577080d7a1514285456e974a71c915ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gym status toggled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Gym not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gyms/{gymId}/students": {
+            "get": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Listar alumnos de un gimnasio",
+                "operationId": "38de82bef58500a734ca2610788c9b85",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de alumnos"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Gimnasio no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Matricular alumno en un gimnasio",
+                "operationId": "1fd931e3cc88a49f3a8746fb31d5810b",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "quota_expires_at"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "quota_expires_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Alumno matriculado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Email no encontrado"
+                    },
+                    "422": {
+                        "description": "Validación fallida"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gyms/{gymId}/students/{studentId}": {
+            "put": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Modificar cuota de un alumno",
+                "operationId": "3db25c531e14379a4fc7dd9e769dc16f",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quota_expires_at"
+                                ],
+                                "properties": {
+                                    "quota_expires_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cuota actualizada"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Alumno no encontrado"
+                    },
+                    "422": {
+                        "description": "Validación fallida"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Dar de baja a un alumno (baja lógica)",
+                "operationId": "d394c7424a0cb43d4fd47ea8c1c6784a",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Alumno dado de baja"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Alumno no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gyms/{gymId}/students/{studentId}/reactivate": {
+            "put": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Dar de alta a un alumno inactivo",
+                "operationId": "c3f8705d64f768180fce4b4019cee28d",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quota_expires_at"
+                                ],
+                                "properties": {
+                                    "quota_expires_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Alumno reactivado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Alumno no encontrado"
+                    },
+                    "422": {
+                        "description": "Validación fallida"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students": {
+            "get": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Listar todos los alumnos de todos los gimnasios del entrenador",
+                "operationId": "8f763de7be2e28bc042aa889853bd6ae",
+                "responses": {
+                    "200": {
+                        "description": "Lista de todos los alumnos"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/routines": {
             "get": {
                 "tags": [
@@ -1230,6 +1903,14 @@
         {
             "name": "Exercises",
             "description": "Exercise management endpoints"
+        },
+        {
+            "name": "Gyms",
+            "description": "Gym management endpoints"
+        },
+        {
+            "name": "Gym Students",
+            "description": "Gestión de alumnos en gimnasios"
         },
         {
             "name": "Routines",

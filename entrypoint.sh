@@ -14,11 +14,26 @@ echo "Checking if database needs seeding..."
 MUSCLE_GROUPS_COUNT=$(php artisan tinker --execute="echo App\Infrastructure\Persistence\Eloquent\MuscleGroupEloquentModel::count();")
 
 if [ "$MUSCLE_GROUPS_COUNT" -eq "0" ]; then
-  echo "Database is empty - running seeders"
+  echo "Database is empty - running base seeders (muscle groups + exercises)"
   php artisan db:seed --force
+
+  # Preguntar si cargar datos de desarrollo
+  echo ""
+  echo "¿Deseas cargar datos de desarrollo? (s/n)"
+  echo "(10 trainers, 13 gyms, 30 students con diferentes estados de cuota)"
+  read -r response
+  if [ "$response" = "s" ] || [ "$response" = "S" ]; then
+    echo "Cargando datos de desarrollo..."
+    php artisan db:seed --class=DevDataSeeder --force
+  else
+    echo "Saltando datos de desarrollo"
+  fi
 else
   echo "Database already has data - skipping seeders"
 fi
+
+echo "Generating Swagger documentation..."
+php artisan l5-swagger:generate
 
 echo "Starting PHP-FPM..."
 exec php-fpm

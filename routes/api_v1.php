@@ -2,6 +2,8 @@
 
 use App\Infrastructure\Http\Controllers\V1\AuthController;
 use App\Infrastructure\Http\Controllers\V1\ExerciseController;
+use App\Infrastructure\Http\Controllers\V1\GymController;
+use App\Infrastructure\Http\Controllers\V1\GymStudentController;
 use App\Infrastructure\Http\Controllers\V1\RoutineController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +36,24 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
     Route::post('routines', [RoutineController::class, 'store']);
     Route::put('routines/{id}', [RoutineController::class, 'update']);
     Route::delete('routines/{id}', [RoutineController::class, 'destroy']);
+});
+
+// Gym routes - require authentication and trainer role
+Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
+    Route::get('gyms', [GymController::class, 'index']);
+    Route::get('gyms/{id}', [GymController::class, 'show']);
+    Route::post('gyms', [GymController::class, 'store']);
+    Route::put('gyms/{id}', [GymController::class, 'update']);
+    Route::delete('gyms/{id}', [GymController::class, 'destroy']);
+    Route::put('gyms/{id}/toggle', [GymController::class, 'toggle']);
+
+    // Gym Students routes
+    Route::get('gyms/{gymId}/students', [GymStudentController::class, 'index']);
+    Route::post('gyms/{gymId}/students', [GymStudentController::class, 'store']);
+    Route::put('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'update']);
+    Route::delete('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'destroy']);
+    Route::put('gyms/{gymId}/students/{studentId}/reactivate', [GymStudentController::class, 'reactivate']);
+
+    // List all students from all trainer's gyms
+    Route::get('students', [GymStudentController::class, 'listAll']);
 });

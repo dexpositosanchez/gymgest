@@ -216,7 +216,137 @@ O directamente:
 ./vendor/bin/phpunit
 ```
 
-**Estado actual:** 60 tests, 124 assertions ✅
+**Estado actual:** 275 tests, 611 assertions ✅
+
+## Datos de Desarrollo
+
+El backend incluye un seeder con datos de desarrollo (`DevDataSeeder`) para facilitar testing y demos del sistema.
+
+### Datos Cargados
+
+Cuando ejecutas el `DevDataSeeder`, se crean:
+
+#### 10 Entrenadores
+- **Emails:** `trainer1@gymgest.dev` ... `trainer10@gymgest.dev`
+- **Password:** `Password123!`
+- **Nombre:** Trainer Number 1, Trainer Number 2, etc.
+- **Género:** Distribuidos entre male, female, other (ciclo de 3)
+- **Fecha nacimiento:** Años 80 (1985-01-01 ... 1985-01-09)
+- **Email verificado:** ✅ Sí (todos pueden hacer login)
+
+#### 13 Gimnasios
+Distribuidos entre los entrenadores con patrón 7-2-1:
+- **7 trainers con 1 gimnasio** (trainer1 ... trainer7)
+- **2 trainers con 2 gimnasios** (trainer8, trainer9)
+- **1 trainer con 3 gimnasios** (trainer10)
+
+**Estructura de cada gimnasio:**
+- **Nombre:** "Gym {N} - Trainer{X}" (ej: "Gym 1 - Trainer1")
+- **Dirección:** "Calle Fitness {N}, {N}"
+- **Localidad/Provincia:** Rotación entre Madrid, Barcelona, Valencia, Sevilla
+- **País:** España
+- **Estado:** Todos activos (`is_active = true`)
+
+#### 30 Alumnos (Students)
+- **Emails:** `student1@gymgest.dev` ... `student30@gymgest.dev`
+- **Password:** `Password123!`
+- **Nombre:** Student Number 1, Student Number 2, etc.
+- **Género:** Distribuidos entre male, female, other (ciclo de 3)
+- **Fecha nacimiento:** Años 90 (1995-01-15 ... 1995-09-15)
+- **Gym Goals:** "Mejorar condición física"
+- **Email verificado:** ✅ Sí
+- **Nota:** Los students NO pueden hacer login en la app web (solo trainers)
+
+#### 15 Asignaciones Gimnasio-Alumno
+Solo los primeros 15 alumnos están asignados a gimnasios, con diferentes estados de cuota:
+
+**5 alumnos con cuota vigente (>30 días):**
+- student1@gymgest.dev ... student5@gymgest.dev
+- Cuota expira en: 31-35 días desde hoy
+- Estado: `is_active = true`, `quota_status = 'active'`
+
+**5 alumnos con cuota próxima a caducar (1-7 días):**
+- student6@gymgest.dev ... student10@gymgest.dev
+- Cuota expira en: 1-5 días desde hoy
+- Estado: `is_active = true`, `quota_status = 'expiring_soon'`
+
+**3 alumnos con cuota caducada (fecha pasada):**
+- student11@gymgest.dev ... student13@gymgest.dev
+- Cuota expiró hace: 1-3 días
+- Estado: `is_active = true`, `quota_status = 'expired'`
+
+**2 alumnos inactivos (dados de baja):**
+- student14@gymgest.dev, student15@gymgest.dev
+- Cuota expiró hace: 30 días
+- Estado: `is_active = false`, `quota_status = 'inactive'`
+
+**Los alumnos 16-30** NO están asignados a ningún gimnasio.
+
+### Cómo Cargar los Datos
+
+#### Opción 1: Con `make up` (recomendado)
+
+Al levantar el backend con `make up`, el Makefile preguntará si quieres cargar datos:
+
+```bash
+cd backend
+make up
+
+# Tras levantar el backend:
+# ¿Cargar datos de desarrollo? (s/n)
+# (10 trainers, 13 gyms, 30 students con diferentes estados de cuota)
+```
+
+Responde `s` o `S` para cargar. El sistema espera 5 segundos y ejecuta el seeder automáticamente.
+
+#### Opción 2: Manualmente con artisan
+
+```bash
+# Dentro del contenedor
+docker exec gymgest_backend php artisan db:seed --class=DevDataSeeder --force
+
+# O desde el directorio backend/
+php artisan db:seed --class=DevDataSeeder
+```
+
+#### Opción 3: Automáticamente en primer arranque
+
+La **primera vez** que levantas el stack con base de datos vacía, el script `entrypoint.sh` preguntará interactivamente si quieres cargar datos de desarrollo tras ejecutar los seeders base (muscle groups + exercises).
+
+### Idempotencia del Seeder
+
+El `DevDataSeeder` usa `firstOrCreate()` con el email como clave única, por lo que:
+- ✅ Puedes ejecutarlo múltiples veces sin crear duplicados
+- ✅ Si los datos ya existen, no hace nada
+- ✅ Si faltan algunos datos, solo crea los que faltan
+
+### Credenciales de Acceso
+
+**Password universal:** `Password123!`
+
+**Trainers (pueden hacer login):**
+```
+trainer1@gymgest.dev  ... trainer10@gymgest.dev
+```
+
+**Students (NO pueden hacer login en web):**
+```
+student1@gymgest.dev  ... student30@gymgest.dev
+```
+
+### Datos Base Obligatorios
+
+Además del `DevDataSeeder`, el sistema requiere datos base que se cargan automáticamente con:
+
+```bash
+php artisan db:seed
+```
+
+Esto carga:
+- **16 grupos musculares** (Pecho, Espalda, Deltoides, Bíceps, Tríceps, etc.)
+- **62 ejercicios por defecto** distribuidos entre los grupos musculares
+
+Estos datos son **obligatorios** para que el sistema funcione correctamente (sin ellos, no puedes crear rutinas).
 
 ## API Endpoints
 

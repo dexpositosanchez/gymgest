@@ -32,6 +32,19 @@ up:
 	@echo "Starting backend container..."
 	@cd .. && $(DOCKER_COMPOSE) up -d $(SERVICE_NAME)
 	@echo "Backend is running on port 9000"
+	@echo ""
+	@echo "¿Cargar datos de desarrollo? (s/n)"
+	@echo "(10 trainers, 13 gyms, 30 students con diferentes estados de cuota)"
+	@read -r response; \
+	if [ "$$response" = "s" ] || [ "$$response" = "S" ]; then \
+		echo "Esperando 5 segundos para que el backend esté listo..."; \
+		sleep 5; \
+		echo "Cargando datos de desarrollo..."; \
+		docker exec $(CONTAINER_NAME) php artisan db:seed --class=DevDataSeeder --force; \
+		echo "✅ Datos de desarrollo cargados"; \
+	else \
+		echo "Saltando datos de desarrollo"; \
+	fi
 
 down:
 	@echo "Stopping backend container..."
