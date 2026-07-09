@@ -35,5 +35,8 @@ fi
 echo "Generating Swagger documentation..."
 php artisan l5-swagger:generate
 
+echo "Starting Laravel Scheduler in background..."
+php artisan schedule:work &
+
 echo "Starting PHP-FPM..."
 exec php-fpm

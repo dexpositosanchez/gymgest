@@ -34,4 +34,12 @@ interface RoutineRepositoryInterface
      * @return void
      */
     public function delete(RoutineId $id): void;
+
+    /**
+     * Check if routine has any assignments
+     *
+     * @param RoutineId $id
+     * @return bool
+     */
+    public function hasAssignments(RoutineId $id): bool;
 }

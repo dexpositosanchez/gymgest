@@ -1564,6 +1564,323 @@
                 ]
             }
         },
+        "/api/v1/gyms/{gymId}/students/{studentId}/routines": {
+            "get": {
+                "tags": [
+                    "Routine Assignments"
+                ],
+                "summary": "Listar rutinas asignadas a un alumno en un gimnasio",
+                "operationId": "c7ab27cd4691781c6ccccdf68be74ca6",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de rutinas asignadas"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Routine Assignments"
+                ],
+                "summary": "Asignar rutina a un alumno",
+                "operationId": "2f56e0b65302e2e714822011cc5b4da9",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "routine_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-07-15"
+                                    },
+                                    "is_current": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rutina asignada exitosamente"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}": {
+            "put": {
+                "tags": [
+                    "Routine Assignments"
+                ],
+                "summary": "Actualizar asignación de rutina",
+                "operationId": "1fb1869454ba881de4102e53b2aaf386",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignmentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "nullable": true
+                                    },
+                                    "is_current": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Asignación actualizada"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Asignación no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Routine Assignments"
+                ],
+                "summary": "Eliminar asignación de rutina",
+                "operationId": "1d0bb85b854909a2e4570e6a2c004fa8",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignmentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Asignación eliminada"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Asignación no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current": {
+            "put": {
+                "tags": [
+                    "Routine Assignments"
+                ],
+                "summary": "Marcar rutina como actual",
+                "operationId": "ed0307cf6a6f8d31578e8ac52f889287",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignmentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rutina marcada como actual"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Asignación no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/routines": {
             "get": {
                 "tags": [
@@ -1911,6 +2228,10 @@
         {
             "name": "Gym Students",
             "description": "Gestión de alumnos en gimnasios"
+        },
+        {
+            "name": "Routine Assignments",
+            "description": "Gestión de asignación de rutinas a alumnos"
         },
         {
             "name": "Routines",

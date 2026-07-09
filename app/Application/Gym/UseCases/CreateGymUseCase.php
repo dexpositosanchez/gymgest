@@ -16,18 +16,22 @@ use App\Domain\Gym\ValueObjects\GymCountry;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\Gym\ValueObjects\GymName;
 use App\Domain\User\ValueObjects\UserId;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 
 final class CreateGymUseCase
 {
     private $gymRepository;
     private $gymDomainService;
+    private $gymStudentRepository;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
-        GymDomainService $gymDomainService
+        GymDomainService $gymDomainService,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->gymRepository = $gymRepository;
         $this->gymDomainService = $gymDomainService;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     public function execute(CreateGymDTO $dto): GymResponseDTO
@@ -54,7 +58,8 @@ final class CreateGymUseCase
             $gym->getProvince()->getValue(),
             $gym->getCountry()->getValue(),
             $gym->isActive(),
-            $this->gymDomainService->isAssigned($gym)
+            $this->gymDomainService->isAssigned($gym),
+            $this->gymStudentRepository->countActiveByGym($gym->getId())
         );
     }
 }

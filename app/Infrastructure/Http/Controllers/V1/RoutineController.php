@@ -282,8 +282,14 @@ class RoutineController extends Controller
             ], 200);
 
         } catch (\DomainException $e) {
-            $statusCode = str_contains($e->getMessage(), 'no encontrada') ? 404 : 403;
-            return response()->json(['error' => $e->getMessage()], $statusCode);
+            // Handle different domain exceptions with appropriate status codes
+            if (str_contains($e->getMessage(), 'no encontrada')) {
+                return response()->json(['error' => $e->getMessage()], 404);
+            } elseif (str_contains($e->getMessage(), 'Cannot update routine with active assignments')) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            } else {
+                return response()->json(['error' => $e->getMessage()], 403);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al actualizar rutina'], 500);
         }
@@ -321,8 +327,14 @@ class RoutineController extends Controller
             return response()->json(null, 204);
 
         } catch (\DomainException $e) {
-            $statusCode = str_contains($e->getMessage(), 'no encontrada') ? 404 : 403;
-            return response()->json(['error' => $e->getMessage()], $statusCode);
+            // Handle different domain exceptions with appropriate status codes
+            if (str_contains($e->getMessage(), 'no encontrada')) {
+                return response()->json(['error' => $e->getMessage()], 404);
+            } elseif (str_contains($e->getMessage(), 'No se puede eliminar esta rutina porque está asignada a un alumno')) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            } else {
+                return response()->json(['error' => $e->getMessage()], 403);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al eliminar rutina'], 500);
         }

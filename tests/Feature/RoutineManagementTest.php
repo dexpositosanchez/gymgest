@@ -472,4 +472,178 @@ class RoutineManagementTest extends TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_cannot_update_routine_with_assignments()
+    {
+        // Create routine
+        $payload = [
+            'name' => 'Assigned Routine',
+            'difficulty' => 'beginner',
+            'days' => [
+                [
+                    'day_number' => 1,
+                    'name' => 'Día 1',
+                    'exercises' => [
+                        [
+                            'exercise_id' => $this->exercise1->id,
+                            'order_index' => 0,
+                            'sets' => $this->createSets(3, 12),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $createResponse = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->postJson('/api/v1/routines', $payload);
+
+        $routineId = $createResponse->json('data.id');
+
+        // Create student and gym
+        $student = UserEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'name' => 'Student',
+            'last_name' => 'Test',
+            'email' => 'student@test.com',
+            'password' => bcrypt('password123'),
+            'user_type' => 'student',
+            'gender' => 'male',
+            'birth_date' => '2000-01-01',
+            'gym_goals' => 'Build muscle',
+            'email_verified_at' => now(),
+        ]);
+
+        $gym = \App\Infrastructure\Persistence\Eloquent\GymEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'trainer_id' => $this->trainer->id,
+            'name' => 'Test Gym',
+            'address' => 'Test Address',
+            'locality' => 'Madrid',
+            'province' => 'Comunidad de Madrid',
+            'country' => 'España',
+            'is_active' => true,
+        ]);
+
+        // Enroll student
+        \App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'gym_id' => $gym->id,
+            'student_id' => $student->id,
+            'quota_expires_at' => date('Y-m-d', strtotime('+30 days')),
+            'is_active' => true,
+        ]);
+
+        // Assign routine to student
+        \App\Infrastructure\Persistence\Eloquent\RoutineAssignmentEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'routine_id' => $routineId,
+            'student_id' => $student->id,
+            'gym_id' => $gym->id,
+            'is_current' => true,
+            'assigned_at' => now(),
+            'starts_at' => date('Y-m-d'),
+        ]);
+
+        // Try to update routine - should fail with DomainException
+        $updatePayload = [
+            'name' => 'Updated Name',
+            'difficulty' => 'advanced',
+            'days' => [
+                [
+                    'day_number' => 1,
+                    'name' => 'Día 1',
+                    'exercises' => [
+                        [
+                            'exercise_id' => $this->exercise1->id,
+                            'order_index' => 0,
+                            'sets' => $this->createSets(3, 12),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->putJson("/api/v1/routines/{$routineId}", $updatePayload);
+
+        $response->assertStatus(400);
+    }
+
+    public function test_cannot_delete_routine_with_assignments()
+    {
+        // Create routine
+        $payload = [
+            'name' => 'Assigned Routine to Delete',
+            'difficulty' => 'beginner',
+            'days' => [
+                [
+                    'day_number' => 1,
+                    'name' => 'Día 1',
+                    'exercises' => [
+                        [
+                            'exercise_id' => $this->exercise1->id,
+                            'order_index' => 0,
+                            'sets' => $this->createSets(3, 12),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $createResponse = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->postJson('/api/v1/routines', $payload);
+
+        $routineId = $createResponse->json('data.id');
+
+        // Create student and gym
+        $student = UserEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'name' => 'Student2',
+            'last_name' => 'Test',
+            'email' => 'student2@test.com',
+            'password' => bcrypt('password123'),
+            'user_type' => 'student',
+            'gender' => 'female',
+            'birth_date' => '1999-01-01',
+            'gym_goals' => 'Lose weight',
+            'email_verified_at' => now(),
+        ]);
+
+        $gym = \App\Infrastructure\Persistence\Eloquent\GymEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'trainer_id' => $this->trainer->id,
+            'name' => 'Test Gym 2',
+            'address' => 'Test Address 2',
+            'locality' => 'Barcelona',
+            'province' => 'Cataluña',
+            'country' => 'España',
+            'is_active' => true,
+        ]);
+
+        // Enroll student
+        \App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'gym_id' => $gym->id,
+            'student_id' => $student->id,
+            'quota_expires_at' => date('Y-m-d', strtotime('+30 days')),
+            'is_active' => true,
+        ]);
+
+        // Assign routine to student
+        \App\Infrastructure\Persistence\Eloquent\RoutineAssignmentEloquentModel::create([
+            'id' => \Ramsey\Uuid\Uuid::uuid4()->toString(),
+            'routine_id' => $routineId,
+            'student_id' => $student->id,
+            'gym_id' => $gym->id,
+            'is_current' => true,
+            'assigned_at' => now(),
+            'starts_at' => date('Y-m-d'),
+        ]);
+
+        // Try to delete routine - should fail with DomainException
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->deleteJson("/api/v1/routines/{$routineId}");
+
+        $response->assertStatus(400);
+    }
 }

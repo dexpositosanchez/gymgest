@@ -10,6 +10,7 @@ use App\Domain\Routine\Entities\RoutineDayEntity;
 use App\Domain\Routine\Entities\RoutineDayExerciseEntity;
 use App\Domain\Routine\Entities\ExerciseSetEntity;
 use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
+use App\Domain\Routine\Services\RoutineDomainService;
 use App\Domain\Routine\ValueObjects\RoutineId;
 use App\Domain\Routine\ValueObjects\RoutineName;
 use App\Domain\Routine\ValueObjects\RoutineDescription;
@@ -24,15 +25,27 @@ use App\Domain\Routine\ValueObjects\ExerciseSetId;
 use App\Domain\Routine\ValueObjects\SetNumber;
 use App\Domain\Routine\ValueObjects\Reps;
 use App\Domain\User\ValueObjects\UserId;
+use App\Domain\RoutineAssignment\Repositories\RoutineAssignmentRepositoryInterface;
 
 class UpdateRoutineUseCase
 {
     /** @var RoutineRepositoryInterface */
     private $routineRepository;
 
-    public function __construct(RoutineRepositoryInterface $routineRepository)
-    {
+    /** @var RoutineDomainService */
+    private $routineDomainService;
+
+    /** @var RoutineAssignmentRepositoryInterface */
+    private $assignmentRepository;
+
+    public function __construct(
+        RoutineRepositoryInterface $routineRepository,
+        RoutineDomainService $routineDomainService,
+        RoutineAssignmentRepositoryInterface $assignmentRepository
+    ) {
         $this->routineRepository = $routineRepository;
+        $this->routineDomainService = $routineDomainService;
+        $this->assignmentRepository = $assignmentRepository;
     }
 
     public function execute(RoutineId $routineId, UpdateRoutineDTO $dto, UserId $trainerId): RoutineEntity
@@ -49,8 +62,8 @@ class UpdateRoutineUseCase
         }
 
         // Check if routine is assigned
-        if ($routine->isAssigned()) {
-            throw new \DomainException('No se puede editar una rutina asignada a estudiantes');
+        if ($this->routineDomainService->isAssigned($routine->getId(), $this->assignmentRepository)) {
+            throw new \DomainException('Cannot update routine with active assignments');
         }
 
         // Validate at least one day

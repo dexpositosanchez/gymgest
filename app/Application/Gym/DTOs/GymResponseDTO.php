@@ -15,6 +15,7 @@ final class GymResponseDTO
     private $country;
     private $isActive;
     private $isAssigned;
+    private $activeStudentsCount;
 
     public function __construct(
         string $id,
@@ -25,7 +26,8 @@ final class GymResponseDTO
         string $province,
         string $country,
         bool $isActive,
-        bool $isAssigned
+        bool $isAssigned,
+        int $activeStudentsCount
     ) {
         $this->id = $id;
         $this->trainerId = $trainerId;
@@ -36,6 +38,7 @@ final class GymResponseDTO
         $this->country = $country;
         $this->isActive = $isActive;
         $this->isAssigned = $isAssigned;
+        $this->activeStudentsCount = $activeStudentsCount;
     }
 
     public function toArray(): array
@@ -50,6 +53,7 @@ final class GymResponseDTO
             'country' => $this->country,
             'is_active' => $this->isActive,
             'is_assigned' => $this->isAssigned,
+            'active_students_count' => $this->activeStudentsCount,
         ];
     }
 }

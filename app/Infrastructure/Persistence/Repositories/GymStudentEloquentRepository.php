@@ -64,4 +64,11 @@ class GymStudentEloquentRepository implements GymStudentRepositoryInterface
     {
         GymStudentEloquentModel::destroy($id->getValue());
     }
+
+    public function countActiveByGym(GymId $gymId): int
+    {
+        return GymStudentEloquentModel::where('gym_id', $gymId->getValue())
+            ->where('is_active', true)
+            ->count();
+    }
 }

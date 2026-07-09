@@ -9,6 +9,7 @@ use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
 use App\Domain\Routine\ValueObjects\RoutineId;
 use App\Domain\User\ValueObjects\UserId;
 use App\Infrastructure\Persistence\Eloquent\RoutineEloquentModel;
+use App\Infrastructure\Persistence\Eloquent\RoutineAssignmentEloquentModel;
 use App\Infrastructure\Persistence\Mappers\RoutineMapper;
 
 class RoutineEloquentRepository implements RoutineRepositoryInterface
@@ -66,5 +67,10 @@ class RoutineEloquentRepository implements RoutineRepositoryInterface
     public function delete(RoutineId $id): void
     {
         RoutineEloquentModel::destroy($id->getValue());
+    }
+
+    public function hasAssignments(RoutineId $id): bool
+    {
+        return RoutineAssignmentEloquentModel::where('routine_id', $id->getValue())->exists();
     }
 }

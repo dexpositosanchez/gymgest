@@ -76,7 +76,7 @@ class ListRoutinesUseCase
                 $routine->getDescription() ? $routine->getDescription()->getValue() : null,
                 $routine->getDifficulty()->getValue(),
                 $daysArray,
-                $routine->isAssigned(),
+                $this->routineRepository->hasAssignments($routine->getId()),
                 $routine->getCreatedAt()->format('Y-m-d H:i:s'),
                 $routine->getUpdatedAt()->format('Y-m-d H:i:s')
             );

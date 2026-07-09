@@ -25,6 +25,11 @@ class UserId
         return new self(Uuid::uuid4()->toString());
     }
 
+    public static function fromString(string $id): self
+    {
+        return new self($id);
+    }
+
     public function getValue(): string
     {
         return $this->value;

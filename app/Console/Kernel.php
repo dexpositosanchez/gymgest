@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Update current routines based on starts_at date (runs daily at midnight)
+        $schedule->command('routines:update-current')->daily();
     }
 
     /**

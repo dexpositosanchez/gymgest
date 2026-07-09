@@ -9,19 +9,23 @@ use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\Services\GymDomainService;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\User\ValueObjects\UserId;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use InvalidArgumentException;
 
 final class ToggleGymUseCase
 {
     private $gymRepository;
     private $gymDomainService;
+    private $gymStudentRepository;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
-        GymDomainService $gymDomainService
+        GymDomainService $gymDomainService,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->gymRepository = $gymRepository;
         $this->gymDomainService = $gymDomainService;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     public function execute(GymId $gymId, UserId $trainerId): GymResponseDTO
@@ -53,7 +57,8 @@ final class ToggleGymUseCase
             $gym->getProvince()->getValue(),
             $gym->getCountry()->getValue(),
             $gym->isActive(),
-            $this->gymDomainService->isAssigned($gym)
+            $this->gymDomainService->isAssigned($gym),
+            $this->gymStudentRepository->countActiveByGym($gym->getId())
         );
     }
 }

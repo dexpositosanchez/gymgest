@@ -5,6 +5,7 @@ use App\Infrastructure\Http\Controllers\V1\ExerciseController;
 use App\Infrastructure\Http\Controllers\V1\GymController;
 use App\Infrastructure\Http\Controllers\V1\GymStudentController;
 use App\Infrastructure\Http\Controllers\V1\RoutineController;
+use App\Infrastructure\Http\Controllers\V1\RoutineAssignmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -53,6 +54,13 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
     Route::put('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'update']);
     Route::delete('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'destroy']);
     Route::put('gyms/{gymId}/students/{studentId}/reactivate', [GymStudentController::class, 'reactivate']);
+
+    // Routine Assignment routes
+    Route::get('gyms/{gymId}/students/{studentId}/routines', [RoutineAssignmentController::class, 'index']);
+    Route::post('gyms/{gymId}/students/{studentId}/routines', [RoutineAssignmentController::class, 'store']);
+    Route::put('gyms/{gymId}/students/{studentId}/routines/{assignmentId}', [RoutineAssignmentController::class, 'update']);
+    Route::delete('gyms/{gymId}/students/{studentId}/routines/{assignmentId}', [RoutineAssignmentController::class, 'destroy']);
+    Route::put('gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current', [RoutineAssignmentController::class, 'setCurrent']);
 
     // List all students from all trainer's gyms
     Route::get('students', [GymStudentController::class, 'listAll']);

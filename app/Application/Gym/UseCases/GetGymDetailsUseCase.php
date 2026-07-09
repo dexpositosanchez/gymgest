@@ -8,6 +8,7 @@ use App\Application\Gym\DTOs\GymResponseDTO;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\Services\GymDomainService;
 use App\Domain\Gym\ValueObjects\GymId;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
 use InvalidArgumentException;
 
@@ -15,13 +16,16 @@ final class GetGymDetailsUseCase
 {
     private $gymRepository;
     private $gymDomainService;
+    private $gymStudentRepository;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
-        GymDomainService $gymDomainService
+        GymDomainService $gymDomainService,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->gymRepository = $gymRepository;
         $this->gymDomainService = $gymDomainService;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     public function execute(GymId $gymId, UserId $trainerId): GymResponseDTO
@@ -45,7 +49,8 @@ final class GetGymDetailsUseCase
             $gym->getProvince()->getValue(),
             $gym->getCountry()->getValue(),
             $gym->isActive(),
-            $this->gymDomainService->isAssigned($gym)
+            $this->gymDomainService->isAssigned($gym),
+            $this->gymStudentRepository->countActiveByGym($gym->getId())
         );
     }
 }

@@ -22,4 +22,6 @@ interface GymStudentRepositoryInterface
     public function findByTrainerId(UserId $trainerId): array;
 
     public function delete(GymStudentId $id): void;
+
+    public function countActiveByGym(GymId $gymId): int;
 }

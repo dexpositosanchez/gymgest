@@ -7,19 +7,23 @@ namespace App\Application\Gym\UseCases;
 use App\Application\Gym\DTOs\GymResponseDTO;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\Services\GymDomainService;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
 
 final class ListGymsUseCase
 {
     private $gymRepository;
     private $gymDomainService;
+    private $gymStudentRepository;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
-        GymDomainService $gymDomainService
+        GymDomainService $gymDomainService,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->gymRepository = $gymRepository;
         $this->gymDomainService = $gymDomainService;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     public function execute(UserId $trainerId, bool $includeInactive = false): array
@@ -37,7 +41,8 @@ final class ListGymsUseCase
                 $gym->getProvince()->getValue(),
                 $gym->getCountry()->getValue(),
                 $gym->isActive(),
-                $this->gymDomainService->isAssigned($gym)
+                $this->gymDomainService->isAssigned($gym),
+                $this->gymStudentRepository->countActiveByGym($gym->getId())
             );
         }
 

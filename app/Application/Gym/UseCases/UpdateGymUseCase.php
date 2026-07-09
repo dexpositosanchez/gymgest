@@ -15,19 +15,23 @@ use App\Domain\Gym\ValueObjects\GymCountry;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\Gym\ValueObjects\GymName;
 use App\Domain\User\ValueObjects\UserId;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use InvalidArgumentException;
 
 final class UpdateGymUseCase
 {
     private $gymRepository;
     private $gymDomainService;
+    private $gymStudentRepository;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
-        GymDomainService $gymDomainService
+        GymDomainService $gymDomainService,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->gymRepository = $gymRepository;
         $this->gymDomainService = $gymDomainService;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     public function execute(UpdateGymDTO $dto): GymResponseDTO
@@ -59,7 +63,8 @@ final class UpdateGymUseCase
             $gym->getProvince()->getValue(),
             $gym->getCountry()->getValue(),
             $gym->isActive(),
-            $this->gymDomainService->isAssigned($gym)
+            $this->gymDomainService->isAssigned($gym),
+            $this->gymStudentRepository->countActiveByGym($gym->getId())
         );
     }
 }
