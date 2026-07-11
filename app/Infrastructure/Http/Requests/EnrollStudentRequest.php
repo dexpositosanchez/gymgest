@@ -16,6 +16,7 @@ class EnrollStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'gym_id' => 'nullable|uuid|exists:gyms,id',
             'email' => 'required|email',
             'quota_expires_at' => 'required|date|date_format:Y-m-d|after:today',
         ];
@@ -24,6 +25,8 @@ class EnrollStudentRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'gym_id.uuid' => 'El ID del gimnasio debe ser un UUID válido',
+            'gym_id.exists' => 'El gimnasio no existe',
             'email.required' => 'El email es obligatorio',
             'email.email' => 'El email debe ser válido',
             'quota_expires_at.required' => 'La fecha de caducidad de la cuota es obligatoria',

@@ -32,6 +32,11 @@ final class ListGymsUseCase
 
         $response = [];
         foreach ($gyms as $gym) {
+            // Skip personal training gyms from the list
+            if ($gym->isPersonalTraining()) {
+                continue;
+            }
+
             $response[] = new GymResponseDTO(
                 $gym->getId()->getValue(),
                 $gym->getTrainerId()->getValue(),
@@ -42,7 +47,8 @@ final class ListGymsUseCase
                 $gym->getCountry()->getValue(),
                 $gym->isActive(),
                 $this->gymDomainService->isAssigned($gym),
-                $this->gymStudentRepository->countActiveByGym($gym->getId())
+                $this->gymStudentRepository->countActiveByGym($gym->getId()),
+                $gym->isPersonalTraining()
             );
         }
 

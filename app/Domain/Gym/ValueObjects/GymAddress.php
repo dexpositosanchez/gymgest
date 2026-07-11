@@ -16,7 +16,7 @@ final class GymAddress
     {
         $trimmed = trim($value);
 
-        if (empty($trimmed)) {
+        if (empty($trimmed) && $value !== 'N/A') {
             throw new InvalidArgumentException('Gym address cannot be empty');
         }
 

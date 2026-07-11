@@ -47,6 +47,8 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
     Route::put('gyms/{id}', [GymController::class, 'update']);
     Route::delete('gyms/{id}', [GymController::class, 'destroy']);
     Route::put('gyms/{id}/toggle', [GymController::class, 'toggle']);
+    Route::get('personal-training', [GymController::class, 'getPersonalTraining']);
+    Route::post('personal-training/students', [GymStudentController::class, 'personalTrainingEnroll']);
 
     // Gym Students routes
     Route::get('gyms/{gymId}/students', [GymStudentController::class, 'index']);

@@ -16,5 +16,7 @@ interface GymRepositoryInterface
 
     public function findByTrainerId(UserId $trainerId, bool $includeInactive = false): array;
 
+    public function findPersonalTrainingGymByTrainer(UserId $trainerId): ?GymEntity;
+
     public function delete(GymId $id): void;
 }

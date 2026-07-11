@@ -50,7 +50,8 @@ final class GetGymDetailsUseCase
             $gym->getCountry()->getValue(),
             $gym->isActive(),
             $this->gymDomainService->isAssigned($gym),
-            $this->gymStudentRepository->countActiveByGym($gym->getId())
+            $this->gymStudentRepository->countActiveByGym($gym->getId()),
+            $gym->isPersonalTraining()
         );
     }
 }

@@ -1250,6 +1250,46 @@
                 ]
             }
         },
+        "/personal-training": {
+            "get": {
+                "tags": [
+                    "Gyms"
+                ],
+                "summary": "Get personal training gym (read-only)",
+                "operationId": "2de96f66e1168f2179b8a4b06bc53956",
+                "responses": {
+                    "200": {
+                        "description": "Personal training gym",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Personal training gym not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Only trainers allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/gyms/{gymId}/students": {
             "get": {
                 "tags": [
@@ -1339,6 +1379,59 @@
                     },
                     "403": {
                         "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Email no encontrado"
+                    },
+                    "422": {
+                        "description": "Validación fallida"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/personal-training/students": {
+            "post": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Matricular alumno en entrenamiento personal",
+                "operationId": "d5ac0dc9e000a33d5f99dbbc5359908a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "quota_expires_at"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "quota_expires_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Alumno matriculado en entrenamiento personal"
+                    },
+                    "401": {
+                        "description": "No autenticado"
                     },
                     "404": {
                         "description": "Email no encontrado"

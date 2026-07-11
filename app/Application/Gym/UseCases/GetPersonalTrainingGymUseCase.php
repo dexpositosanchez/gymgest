@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\Gym\UseCases;
 
-use App\Application\Gym\DTOs\CreateGymDTO;
 use App\Application\Gym\DTOs\GymResponseDTO;
-use App\Domain\Gym\Entities\GymEntity;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\Services\GymDomainService;
-use App\Domain\Gym\ValueObjects\GymAddress;
-use App\Domain\Gym\ValueObjects\GymLocality;
-use App\Domain\Gym\ValueObjects\GymProvince;
-use App\Domain\Gym\ValueObjects\GymCountry;
-use App\Domain\Gym\ValueObjects\GymId;
-use App\Domain\Gym\ValueObjects\GymName;
 use App\Domain\User\ValueObjects\UserId;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 
-final class CreateGymUseCase
+final class GetPersonalTrainingGymUseCase
 {
     private $gymRepository;
     private $gymDomainService;
@@ -34,20 +26,18 @@ final class CreateGymUseCase
         $this->gymStudentRepository = $gymStudentRepository;
     }
 
-    public function execute(CreateGymDTO $dto): GymResponseDTO
+    /**
+     * Get personal training gym (read-only, returns null if doesn't exist)
+     */
+    public function execute(string $trainerId): ?GymResponseDTO
     {
-        $gym = new GymEntity(
-            GymId::generate(),
-            new UserId($dto->getTrainerId()),
-            new GymName($dto->getName()),
-            new GymAddress($dto->getAddress()),
-            new GymLocality($dto->getLocality()),
-            new GymProvince($dto->getProvince()),
-            new GymCountry($dto->getCountry()),
-            true
-        );
+        $trainerIdVO = new UserId($trainerId);
 
-        $this->gymRepository->save($gym);
+        $gym = $this->gymRepository->findPersonalTrainingGymByTrainer($trainerIdVO);
+
+        if ($gym === null) {
+            return null;
+        }
 
         return new GymResponseDTO(
             $gym->getId()->getValue(),

@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 class GymEntityTest extends TestCase
 {
-    private function createGym(bool $isActive = true): GymEntity
+    private function createGym(bool $isActive = true, bool $isPersonalTraining = false): GymEntity
     {
         return new GymEntity(
             new GymId('123e4567-e89b-12d3-a456-426614174000'),
@@ -26,7 +26,8 @@ class GymEntityTest extends TestCase
             new GymLocality('Madrid'),
             new GymProvince('Comunidad de Madrid'),
             new GymCountry('España'),
-            $isActive
+            $isActive,
+            $isPersonalTraining
         );
     }
 
@@ -133,5 +134,35 @@ class GymEntityTest extends TestCase
         $gym->deactivate();
 
         $this->assertFalse($gym->isActive());
+    }
+
+    public function test_gym_is_not_personal_training_by_default(): void
+    {
+        $gym = $this->createGym();
+
+        $this->assertFalse($gym->isPersonalTraining());
+        $this->assertFalse($gym->isVirtual());
+    }
+
+    public function test_can_create_personal_training_gym(): void
+    {
+        $gym = new GymEntity(
+            new GymId('123e4567-e89b-12d3-a456-426614174000'),
+            new UserId('223e4567-e89b-12d3-a456-426614174000'),
+            new GymName('Entrenamiento Personal'),
+            new GymAddress('N/A'),
+            new GymLocality('N/A'),
+            new GymProvince('N/A'),
+            new GymCountry('N/A'),
+            true,
+            true // is_personal_training
+        );
+
+        $this->assertTrue($gym->isPersonalTraining());
+        $this->assertTrue($gym->isVirtual());
+        $this->assertEquals('N/A', $gym->getAddress()->getValue());
+        $this->assertEquals('N/A', $gym->getLocality()->getValue());
+        $this->assertEquals('N/A', $gym->getProvince()->getValue());
+        $this->assertEquals('N/A', $gym->getCountry()->getValue());
     }
 }

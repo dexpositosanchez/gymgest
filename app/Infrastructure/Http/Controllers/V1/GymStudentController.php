@@ -116,8 +116,60 @@ class GymStudentController extends Controller
     {
         try {
             $trainerId = auth()->id();
+
+            // Use gym_id from request body if provided, otherwise use path parameter
+            // If gym_id is explicitly null in body, pass null (for personal training)
             $dto = new EnrollStudentDTO(
-                $gymId,
+                $request->input('gym_id', $gymId),
+                $request->input('email'),
+                $request->input('quota_expires_at')
+            );
+
+            $student = $this->enrollStudentUseCase->execute($dto, $trainerId);
+
+            return response()->json(['data' => $student], 201);
+        } catch (InvalidArgumentException $e) {
+            if ($e->getMessage() === 'Gym not found') {
+                return response()->json(['error' => $e->getMessage()], 404);
+            }
+            if ($e->getMessage() === 'Unauthorized') {
+                return response()->json(['error' => $e->getMessage()], 403);
+            }
+            if ($e->getMessage() === 'No existe ningún alumno registrado con ese email') {
+                return response()->json(['error' => $e->getMessage()], 404);
+            }
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/personal-training/students",
+     *     summary="Matricular alumno en entrenamiento personal",
+     *     tags={"Gym Students"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "quota_expires_at"},
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="quota_expires_at", type="string", format="date", example="2026-12-31")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Alumno matriculado en entrenamiento personal"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=404, description="Email no encontrado"),
+     *     @OA\Response(response=422, description="Validación fallida")
+     * )
+     */
+    public function personalTrainingEnroll(EnrollStudentRequest $request): JsonResponse
+    {
+        try {
+            $trainerId = auth()->id();
+
+            // gym_id is null for personal training - UseCase will create/get virtual gym
+            $dto = new EnrollStudentDTO(
+                null,
                 $request->input('email'),
                 $request->input('quota_expires_at')
             );

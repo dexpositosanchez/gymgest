@@ -22,6 +22,7 @@ final class GymEntity
     private $province;
     private $country;
     private $isActive;
+    private $isPersonalTraining;
 
     public function __construct(
         GymId $id,
@@ -31,7 +32,8 @@ final class GymEntity
         GymLocality $locality,
         GymProvince $province,
         GymCountry $country,
-        bool $isActive = true
+        bool $isActive = true,
+        bool $isPersonalTraining = false
     ) {
         $this->id = $id;
         $this->trainerId = $trainerId;
@@ -41,6 +43,7 @@ final class GymEntity
         $this->province = $province;
         $this->country = $country;
         $this->isActive = $isActive;
+        $this->isPersonalTraining = $isPersonalTraining;
     }
 
     public function getId(): GymId
@@ -127,5 +130,15 @@ final class GymEntity
     public function deactivate(): void
     {
         $this->isActive = false;
+    }
+
+    public function isPersonalTraining(): bool
+    {
+        return $this->isPersonalTraining;
+    }
+
+    public function isVirtual(): bool
+    {
+        return $this->isPersonalTraining;
     }
 }

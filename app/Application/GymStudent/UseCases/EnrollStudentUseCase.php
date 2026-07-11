@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\GymStudent\UseCases;
 
+use App\Application\Gym\UseCases\GetOrCreatePersonalTrainingGymUseCase;
 use App\Application\GymStudent\DTOs\EnrollStudentDTO;
 use App\Application\GymStudent\DTOs\GymStudentResponseDTO;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
@@ -25,23 +26,33 @@ class EnrollStudentUseCase
     private UserRepositoryInterface $userRepository;
     private GymStudentRepositoryInterface $gymStudentRepository;
     private GymStudentDomainService $domainService;
+    private GetOrCreatePersonalTrainingGymUseCase $getOrCreatePersonalTrainingGymUseCase;
 
     public function __construct(
         GymRepositoryInterface $gymRepository,
         UserRepositoryInterface $userRepository,
         GymStudentRepositoryInterface $gymStudentRepository,
-        GymStudentDomainService $domainService
+        GymStudentDomainService $domainService,
+        GetOrCreatePersonalTrainingGymUseCase $getOrCreatePersonalTrainingGymUseCase
     ) {
         $this->gymRepository = $gymRepository;
         $this->userRepository = $userRepository;
         $this->gymStudentRepository = $gymStudentRepository;
         $this->domainService = $domainService;
+        $this->getOrCreatePersonalTrainingGymUseCase = $getOrCreatePersonalTrainingGymUseCase;
     }
 
     public function execute(EnrollStudentDTO $dto, string $trainerId): GymStudentResponseDTO
     {
+        // Si gym_id es null, obtener o crear gimnasio de entrenamiento personal
+        $actualGymId = $dto->gymId;
+        if ($actualGymId === null) {
+            $personalTrainingGym = $this->getOrCreatePersonalTrainingGymUseCase->execute($trainerId);
+            $actualGymId = $personalTrainingGym->toArray()['id'];
+        }
+
         // Verificar que el gimnasio existe y pertenece al trainer
-        $gym = $this->gymRepository->findById(new GymId($dto->gymId));
+        $gym = $this->gymRepository->findById(new GymId($actualGymId));
         if (!$gym) {
             throw new InvalidArgumentException('Gym not found');
         }
@@ -63,7 +74,7 @@ class EnrollStudentUseCase
 
         // Verificar si ya existe una matrícula
         $existingEnrollment = $this->gymStudentRepository->findByGymAndStudent(
-            new GymId($dto->gymId),
+            new GymId($actualGymId),
             $student->getId()
         );
 
@@ -83,7 +94,7 @@ class EnrollStudentUseCase
             // Crear nueva matrícula
             $gymStudent = new GymStudentEntity(
                 new GymStudentId(Str::uuid()->toString()),
-                new GymId($dto->gymId),
+                new GymId($actualGymId),
                 $student->getId(),
                 $quotaExpiresAt,
                 true

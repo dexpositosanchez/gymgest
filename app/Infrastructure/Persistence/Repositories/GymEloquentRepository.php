@@ -55,6 +55,19 @@ class GymEloquentRepository implements GymRepositoryInterface
         return $gyms;
     }
 
+    public function findPersonalTrainingGymByTrainer(UserId $trainerId): ?GymEntity
+    {
+        $model = GymEloquentModel::where('trainer_id', $trainerId->getValue())
+            ->where('is_personal_training', true)
+            ->first();
+
+        if (!$model) {
+            return null;
+        }
+
+        return GymMapper::toDomain($model);
+    }
+
     public function delete(GymId $id): void
     {
         GymEloquentModel::where('id', $id->getValue())->delete();

@@ -14,7 +14,7 @@ class GymProvince
     {
         $trimmedValue = trim($value);
 
-        if (empty($trimmedValue)) {
+        if (empty($trimmedValue) && $value !== 'N/A') {
             throw new InvalidArgumentException('Gym province cannot be empty');
         }
 

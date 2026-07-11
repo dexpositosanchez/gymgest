@@ -22,10 +22,12 @@ class GymEloquentModel extends Model
         'province',
         'country',
         'is_active',
+        'is_personal_training',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_personal_training' => 'boolean',
     ];
 
     public function trainer()

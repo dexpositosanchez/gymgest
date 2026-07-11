@@ -9,6 +9,7 @@ use App\Application\Gym\DTOs\UpdateGymDTO;
 use App\Application\Gym\UseCases\CreateGymUseCase;
 use App\Application\Gym\UseCases\DeleteGymUseCase;
 use App\Application\Gym\UseCases\GetGymDetailsUseCase;
+use App\Application\Gym\UseCases\GetPersonalTrainingGymUseCase;
 use App\Application\Gym\UseCases\ListGymsUseCase;
 use App\Application\Gym\UseCases\ToggleGymUseCase;
 use App\Application\Gym\UseCases\UpdateGymUseCase;
@@ -34,6 +35,7 @@ class GymController extends Controller
     private $updateGymUseCase;
     private $deleteGymUseCase;
     private $toggleGymUseCase;
+    private $getPersonalTrainingGymUseCase;
 
     public function __construct(
         ListGymsUseCase $listGymsUseCase,
@@ -41,7 +43,8 @@ class GymController extends Controller
         CreateGymUseCase $createGymUseCase,
         UpdateGymUseCase $updateGymUseCase,
         DeleteGymUseCase $deleteGymUseCase,
-        ToggleGymUseCase $toggleGymUseCase
+        ToggleGymUseCase $toggleGymUseCase,
+        GetPersonalTrainingGymUseCase $getPersonalTrainingGymUseCase
     ) {
         $this->listGymsUseCase = $listGymsUseCase;
         $this->getGymDetailsUseCase = $getGymDetailsUseCase;
@@ -49,6 +52,7 @@ class GymController extends Controller
         $this->updateGymUseCase = $updateGymUseCase;
         $this->deleteGymUseCase = $deleteGymUseCase;
         $this->toggleGymUseCase = $toggleGymUseCase;
+        $this->getPersonalTrainingGymUseCase = $getPersonalTrainingGymUseCase;
         $this->middleware(['jwt.auth', 'trainer.only']);
     }
 
@@ -350,6 +354,44 @@ class GymController extends Controller
             return response()->json(['error' => $e->getMessage()], 403);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al cambiar estado del gimnasio'], 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/personal-training",
+     *     summary="Get personal training gym (read-only)",
+     *     tags={"Gyms"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Personal training gym",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Personal training gym not found"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden - Only trainers allowed")
+     * )
+     */
+    public function getPersonalTraining(): JsonResponse
+    {
+        try {
+            $trainerId = auth()->user()->id;
+
+            $gym = $this->getPersonalTrainingGymUseCase->execute($trainerId);
+
+            if ($gym === null) {
+                return response()->json(['error' => 'Personal training gym not found'], 404);
+            }
+
+            return response()->json([
+                'data' => $gym->toArray()
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener gimnasio de entrenamiento personal'], 500);
         }
     }
 }

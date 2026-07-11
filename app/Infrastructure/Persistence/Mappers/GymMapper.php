@@ -26,7 +26,8 @@ class GymMapper
             new GymLocality($model->locality),
             new GymProvince($model->province),
             new GymCountry($model->country),
-            $model->is_active
+            $model->is_active,
+            $model->is_personal_training ?? false
         );
     }
 
@@ -41,6 +42,7 @@ class GymMapper
         $model->province = $entity->getProvince()->getValue();
         $model->country = $entity->getCountry()->getValue();
         $model->is_active = $entity->isActive();
+        $model->is_personal_training = $entity->isPersonalTraining();
 
         return $model;
     }
@@ -53,5 +55,6 @@ class GymMapper
         $model->province = $entity->getProvince()->getValue();
         $model->country = $entity->getCountry()->getValue();
         $model->is_active = $entity->isActive();
+        $model->is_personal_training = $entity->isPersonalTraining();
     }
 }
