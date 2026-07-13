@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Repositories;
 
+use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\GymStudent\Entities\GymStudentEntity;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
@@ -15,16 +16,23 @@ use App\Infrastructure\Persistence\Mappers\GymStudentMapper;
 class GymStudentEloquentRepository implements GymStudentRepositoryInterface
 {
     private GymStudentMapper $mapper;
+    private RoutineAssignmentCacheService $cacheService;
 
-    public function __construct(GymStudentMapper $mapper)
-    {
+    public function __construct(
+        GymStudentMapper $mapper,
+        RoutineAssignmentCacheService $cacheService
+    ) {
         $this->mapper = $mapper;
+        $this->cacheService = $cacheService;
     }
 
     public function save(GymStudentEntity $gymStudent): void
     {
         $model = $this->mapper->toEloquent($gymStudent);
         $model->save();
+
+        // Invalidate routine cache when gym_student relationship changes
+        $this->cacheService->invalidate($gymStudent->getStudentId()->getValue());
     }
 
     public function findById(GymStudentId $id): ?GymStudentEntity

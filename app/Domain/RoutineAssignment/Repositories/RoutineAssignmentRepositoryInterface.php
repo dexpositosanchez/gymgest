@@ -32,4 +32,12 @@ interface RoutineAssignmentRepositoryInterface
      * Check if a future current assignment exists for student in gym
      */
     public function hasFutureCurrentAssignment(UserId $studentId, GymId $gymId, string $afterDate): bool;
+
+    /**
+     * Find student routines with details (gym, trainer, routine)
+     * Filters: gym_id, trainer_id, difficulty, is_current, from, to
+     * Orders: is_current DESC, assigned_at DESC
+     * Returns paginated result
+     */
+    public function findStudentRoutinesWithDetails(UserId $studentId, array $filters, int $page, int $perPage): array;
 }

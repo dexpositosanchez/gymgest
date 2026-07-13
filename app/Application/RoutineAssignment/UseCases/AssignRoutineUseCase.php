@@ -6,6 +6,7 @@ namespace App\Application\RoutineAssignment\UseCases;
 
 use App\Application\RoutineAssignment\DTOs\AssignRoutineDTO;
 use App\Application\RoutineAssignment\DTOs\RoutineAssignmentResponseDTO;
+use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
@@ -29,6 +30,7 @@ class AssignRoutineUseCase
     private GymRepositoryInterface $gymRepository;
     private RoutineAssignmentDomainService $domainService;
     private RoutineAssignmentResponseBuilderInterface $responseBuilder;
+    private RoutineAssignmentCacheService $cacheService;
 
     public function __construct(
         RoutineAssignmentRepositoryInterface $assignmentRepository,
@@ -36,7 +38,8 @@ class AssignRoutineUseCase
         GymStudentRepositoryInterface $gymStudentRepository,
         GymRepositoryInterface $gymRepository,
         RoutineAssignmentDomainService $domainService,
-        RoutineAssignmentResponseBuilderInterface $responseBuilder
+        RoutineAssignmentResponseBuilderInterface $responseBuilder,
+        RoutineAssignmentCacheService $cacheService
     ) {
         $this->assignmentRepository = $assignmentRepository;
         $this->routineRepository = $routineRepository;
@@ -44,6 +47,7 @@ class AssignRoutineUseCase
         $this->gymRepository = $gymRepository;
         $this->domainService = $domainService;
         $this->responseBuilder = $responseBuilder;
+        $this->cacheService = $cacheService;
     }
 
     public function execute(AssignRoutineDTO $dto): RoutineAssignmentResponseDTO
@@ -108,6 +112,9 @@ class AssignRoutineUseCase
                 $assignment->getId()
             );
         }
+
+        // Invalidate student cache
+        $this->cacheService->invalidate($dto->studentId);
 
         return $this->responseBuilder->buildFromEntity($assignment);
     }

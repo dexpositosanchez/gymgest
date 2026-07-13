@@ -321,9 +321,9 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(201);
     }
 
-    public function test_student_user_cannot_login()
+    public function test_student_user_can_login()
     {
-        // Create a student user
+        // Create a verified student user
         $user = new \App\Infrastructure\Persistence\Eloquent\UserEloquentModel();
         $user->id = \App\Domain\User\ValueObjects\UserId::generate()->getValue();
         $user->email = 'student@example.com';
@@ -334,6 +334,7 @@ class AuthenticationTest extends TestCase
         $user->birth_date = '1995-01-01';
         $user->gender = 'male';
         $user->gym_goals = 'Get fit';
+        $user->email_verified_at = now(); // Email verified
         $user->save();
 
         // Attempt login with valid credentials
@@ -344,9 +345,15 @@ class AuthenticationTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/login', $credentials);
 
-        $response->assertStatus(403)
-                ->assertJson([
-                    'error' => 'Esta aplicación es solo para entrenadores'
+        // Students can now login
+        $response->assertStatus(200)
+                ->assertJsonStructure([
+                    'access_token',
+                    'token_type',
+                    'user' => ['id', 'email', 'user_type', 'name', 'last_name']
                 ]);
+
+        // Verify user_type is student
+        $this->assertEquals('student', $response->json('user.user_type'));
     }
 }

@@ -29,11 +29,6 @@ class LoginUserUseCase
             throw new \InvalidArgumentException('Email o contraseña incorrectos');
         }
 
-        // Verificar que el usuario es trainer
-        if (!$user->getUserType()->isTrainer()) {
-            throw new \DomainException('Esta aplicación es solo para entrenadores');
-        }
-
         // Verificar que el email está verificado
         if (!$user->isEmailVerified()) {
             throw new \DomainException('Debes verificar tu email antes de iniciar sesión');

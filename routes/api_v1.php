@@ -6,6 +6,7 @@ use App\Infrastructure\Http\Controllers\V1\GymController;
 use App\Infrastructure\Http\Controllers\V1\GymStudentController;
 use App\Infrastructure\Http\Controllers\V1\RoutineController;
 use App\Infrastructure\Http\Controllers\V1\RoutineAssignmentController;
+use App\Infrastructure\Http\Controllers\V1\StudentRoutineController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -55,6 +56,7 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
     Route::post('gyms/{gymId}/students', [GymStudentController::class, 'store']);
     Route::put('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'update']);
     Route::delete('gyms/{gymId}/students/{studentId}', [GymStudentController::class, 'destroy']);
+    Route::put('gyms/{gymId}/students/{studentId}/deactivate', [GymStudentController::class, 'deactivate']);
     Route::put('gyms/{gymId}/students/{studentId}/reactivate', [GymStudentController::class, 'reactivate']);
 
     // Routine Assignment routes
@@ -66,4 +68,10 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
 
     // List all students from all trainer's gyms
     Route::get('students', [GymStudentController::class, 'listAll']);
+});
+
+// Student Routine routes - require authentication and student role
+Route::middleware(['jwt.auth', 'student.only'])->group(function () {
+    Route::get('students/me/routines', [StudentRoutineController::class, 'index']);
+    Route::get('students/me/routines/current', [StudentRoutineController::class, 'current']);
 });

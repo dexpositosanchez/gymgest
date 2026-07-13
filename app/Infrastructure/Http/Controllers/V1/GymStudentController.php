@@ -290,6 +290,48 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Put(
+     *     path="/api/v1/gyms/{gymId}/students/{studentId}/deactivate",
+     *     summary="Dar de baja a un alumno activo",
+     *     tags={"Gym Students"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="gymId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="studentId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(response=204, description="Alumno desactivado"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=404, description="Alumno no encontrado")
+     * )
+     */
+    public function deactivate(string $gymId, string $studentId): JsonResponse
+    {
+        try {
+            $trainerId = auth()->id();
+            $this->deactivateStudentUseCase->execute($gymId, $studentId, $trainerId);
+
+            return response()->json(null, 204);
+        } catch (InvalidArgumentException $e) {
+            if ($e->getMessage() === 'Gym not found' || $e->getMessage() === 'Student not enrolled in this gym') {
+                return response()->json(['error' => $e->getMessage()], 404);
+            }
+            if ($e->getMessage() === 'Unauthorized') {
+                return response()->json(['error' => $e->getMessage()], 403);
+            }
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * @OA\Put(
      *     path="/api/v1/gyms/{gymId}/students/{studentId}/reactivate",
      *     summary="Dar de alta a un alumno inactivo",
      *     tags={"Gym Students"},

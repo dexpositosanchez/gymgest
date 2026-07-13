@@ -102,4 +102,71 @@ final class RoutineAssignmentEloquentRepository implements RoutineAssignmentRepo
             ->where('starts_at', '>', $afterDate)
             ->exists();
     }
+
+    public function findStudentRoutinesWithDetails(UserId $studentId, array $filters, int $page, int $perPage): array
+    {
+        $query = RoutineAssignmentEloquentModel::query()
+            ->where('routine_assignments.student_id', $studentId->getValue())
+            ->join('gym_students', function ($join) use ($studentId) {
+                $join->on('routine_assignments.gym_id', '=', 'gym_students.gym_id')
+                    ->where('gym_students.student_id', '=', $studentId->getValue())
+                    ->where('gym_students.is_active', '=', true);
+            })
+            ->join('gyms', 'routine_assignments.gym_id', '=', 'gyms.id')
+            ->join('routines', 'routine_assignments.routine_id', '=', 'routines.id')
+            ->join('users', 'gyms.trainer_id', '=', 'users.id')
+            ->select(
+                'routine_assignments.*',
+                'gyms.name as gym_name',
+                'gyms.is_personal_training as gym_is_personal_training',
+                'routines.name as routine_name',
+                'routines.difficulty as routine_difficulty',
+                'users.id as trainer_id',
+                'users.name as trainer_name',
+                'users.last_name as trainer_last_name',
+                'users.email as trainer_email'
+            );
+
+        // Apply filters
+        if (isset($filters['gym_id'])) {
+            $query->where('routine_assignments.gym_id', $filters['gym_id']);
+        }
+
+        if (isset($filters['trainer_id'])) {
+            $query->where('gyms.trainer_id', $filters['trainer_id']);
+        }
+
+        if (isset($filters['difficulty'])) {
+            $query->where('routines.difficulty', $filters['difficulty']);
+        }
+
+        if (isset($filters['is_current'])) {
+            $query->where('routine_assignments.is_current', $filters['is_current']);
+        }
+
+        if (isset($filters['from'])) {
+            $query->where('routine_assignments.starts_at', '>=', $filters['from']);
+        }
+
+        if (isset($filters['to'])) {
+            $query->where('routine_assignments.starts_at', '<=', $filters['to']);
+        }
+
+        // Order by is_current DESC, assigned_at DESC (uses optimized index)
+        $query->orderBy('routine_assignments.is_current', 'desc')
+            ->orderBy('routine_assignments.assigned_at', 'desc');
+
+        // Paginate
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        return [
+            'data' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+            ],
+        ];
+    }
 }

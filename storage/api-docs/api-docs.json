@@ -2298,6 +2298,160 @@
                     }
                 ]
             }
+        },
+        "/api/v1/students/me/routines": {
+            "get": {
+                "tags": [
+                    "Student Routines"
+                ],
+                "summary": "List all assigned routines for authenticated student",
+                "operationId": "8f98b9f5e9756a758cb9768c53d34397",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (max 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "gym_id",
+                        "in": "query",
+                        "description": "Filter by gym ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "trainer_id",
+                        "in": "query",
+                        "description": "Filter by trainer ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "difficulty",
+                        "in": "query",
+                        "description": "Filter by difficulty",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "beginner",
+                                "intermediate",
+                                "advanced"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Filter by starts_at from date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "Filter by starts_at to date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of assigned routines with pagination metadata"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not a student"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/students/me/routines/current": {
+            "get": {
+                "tags": [
+                    "Student Routines"
+                ],
+                "summary": "List only current routines for authenticated student",
+                "operationId": "c414d26a190558b1ec55af62a0cb632a",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (max 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of current routines with pagination metadata"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not a student"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -2329,6 +2483,10 @@
         {
             "name": "Routines",
             "description": "Routine management endpoints"
+        },
+        {
+            "name": "Student Routines",
+            "description": "Student endpoints for viewing assigned routines"
         },
         {
             "name": "Authentication",

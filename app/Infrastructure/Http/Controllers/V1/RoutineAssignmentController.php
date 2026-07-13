@@ -8,7 +8,7 @@ use App\Application\RoutineAssignment\DTOs\AssignRoutineDTO;
 use App\Application\RoutineAssignment\DTOs\UpdateAssignmentDTO;
 use App\Application\RoutineAssignment\UseCases\AssignRoutineUseCase;
 use App\Application\RoutineAssignment\UseCases\DeleteAssignmentUseCase;
-use App\Application\RoutineAssignment\UseCases\ListStudentRoutinesUseCase;
+use App\Application\RoutineAssignment\UseCases\ListTrainerStudentRoutinesUseCase;
 use App\Application\RoutineAssignment\UseCases\SetCurrentRoutineUseCase;
 use App\Application\RoutineAssignment\UseCases\UpdateAssignmentUseCase;
 use App\Infrastructure\Http\Controllers\Controller;
@@ -25,20 +25,20 @@ use InvalidArgumentException;
  */
 class RoutineAssignmentController extends Controller
 {
-    private ListStudentRoutinesUseCase $listStudentRoutinesUseCase;
+    private ListTrainerStudentRoutinesUseCase $listTrainerStudentRoutinesUseCase;
     private AssignRoutineUseCase $assignRoutineUseCase;
     private UpdateAssignmentUseCase $updateAssignmentUseCase;
     private DeleteAssignmentUseCase $deleteAssignmentUseCase;
     private SetCurrentRoutineUseCase $setCurrentRoutineUseCase;
 
     public function __construct(
-        ListStudentRoutinesUseCase $listStudentRoutinesUseCase,
+        ListTrainerStudentRoutinesUseCase $listTrainerStudentRoutinesUseCase,
         AssignRoutineUseCase $assignRoutineUseCase,
         UpdateAssignmentUseCase $updateAssignmentUseCase,
         DeleteAssignmentUseCase $deleteAssignmentUseCase,
         SetCurrentRoutineUseCase $setCurrentRoutineUseCase
     ) {
-        $this->listStudentRoutinesUseCase = $listStudentRoutinesUseCase;
+        $this->listTrainerStudentRoutinesUseCase = $listTrainerStudentRoutinesUseCase;
         $this->assignRoutineUseCase = $assignRoutineUseCase;
         $this->updateAssignmentUseCase = $updateAssignmentUseCase;
         $this->deleteAssignmentUseCase = $deleteAssignmentUseCase;
@@ -71,7 +71,7 @@ class RoutineAssignmentController extends Controller
     public function index(string $gymId, string $studentId): JsonResponse
     {
         try {
-            $assignments = $this->listStudentRoutinesUseCase->execute($studentId, $gymId);
+            $assignments = $this->listTrainerStudentRoutinesUseCase->execute($studentId, $gymId);
 
             return response()->json(['data' => $assignments], 200);
         } catch (InvalidArgumentException $e) {

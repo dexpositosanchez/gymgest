@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\RoutineAssignment\UseCases;
 
+use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\RoutineAssignment\Repositories\RoutineAssignmentRepositoryInterface;
 use App\Domain\RoutineAssignment\Services\RoutineAssignmentDomainService;
@@ -15,15 +16,18 @@ class SetCurrentRoutineUseCase
     private RoutineAssignmentRepositoryInterface $assignmentRepository;
     private GymRepositoryInterface $gymRepository;
     private RoutineAssignmentDomainService $domainService;
+    private RoutineAssignmentCacheService $cacheService;
 
     public function __construct(
         RoutineAssignmentRepositoryInterface $assignmentRepository,
         GymRepositoryInterface $gymRepository,
-        RoutineAssignmentDomainService $domainService
+        RoutineAssignmentDomainService $domainService,
+        RoutineAssignmentCacheService $cacheService
     ) {
         $this->assignmentRepository = $assignmentRepository;
         $this->gymRepository = $gymRepository;
         $this->domainService = $domainService;
+        $this->cacheService = $cacheService;
     }
 
     public function execute(string $assignmentId, string $trainerId): void
@@ -49,5 +53,8 @@ class SetCurrentRoutineUseCase
             $assignment->getGymId(),
             $assignment->getId()
         );
+
+        // Invalidate student cache
+        $this->cacheService->invalidate($assignment->getStudentId()->getValue());
     }
 }

@@ -20,6 +20,8 @@ use App\Infrastructure\Persistence\Repositories\RoutineEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\GymEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\GymStudentEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\RoutineAssignmentEloquentRepository;
+use App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel;
+use App\Infrastructure\Persistence\Observers\GymStudentObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -91,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // Register observers
+        GymStudentEloquentModel::observe(GymStudentObserver::class);
     }
 }

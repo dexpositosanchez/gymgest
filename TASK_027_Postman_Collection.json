@@ -1,0 +1,1012 @@
+{
+	"info": {
+		"_postman_id": "task-027-test-collection",
+		"name": "TASK_027 - Student Routine List API",
+		"description": "Colección completa para probar el endpoint de lista de rutinas para alumnos con caché y filtros",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "trainer_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "student_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gym_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "routine_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "student_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "exercise_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. SETUP - Crear datos de prueba",
+			"item": [
+				{
+					"name": "1.1 Registrar Trainer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.test('✅ Trainer registrado correctamente', () => {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"} else {",
+									"    pm.test('ℹ️  Trainer ya existe, continuando...', () => {",
+									"        pm.expect([201, 422]).to.include(pm.response.code);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Trainer\",\n  \"email\": \"trainer.task027@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"trainer\",\n  \"birth_date\": \"1990-01-01\",\n  \"gender\": \"male\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Login Trainer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Login trainer exitoso', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.access_token).to.be.a('string');",
+									"    pm.collectionVariables.set('trainer_token', jsonData.access_token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"trainer.task027@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Crear Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Gym creado correctamente', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.id).to.be.a('string');",
+									"    pm.collectionVariables.set('gym_id', jsonData.data.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Gym TASK_027\",\n  \"address\": \"Calle Test 123\",\n  \"locality\": \"Madrid\",\n  \"province\": \"Madrid\",\n  \"country\": \"España\",\n  \"is_personal_training\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms",
+							"host": ["{{base_url}}"],
+							"path": ["gyms"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Listar Ejercicios (obtener ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Ejercicios obtenidos', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    if (jsonData.data.length > 0) {",
+									"        pm.collectionVariables.set('exercise_id', jsonData.data[0].id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/exercises",
+							"host": ["{{base_url}}"],
+							"path": ["exercises"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Crear Rutina",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Rutina creada correctamente', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.id).to.be.a('string');",
+									"    pm.collectionVariables.set('routine_id', jsonData.data.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Rutina TASK_027 - Fuerza\",\n  \"difficulty\": \"intermediate\",\n  \"days\": [\n    {\n      \"day_number\": 1,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": 4,\n          \"reps\": 12\n        }\n      ]\n    },\n    {\n      \"day_number\": 3,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": 3,\n          \"reps\": 10\n        }\n      ]\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/routines",
+							"host": ["{{base_url}}"],
+							"path": ["routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.6 Registrar Alumno",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.test('✅ Alumno registrado correctamente', () => {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"} else {",
+									"    pm.test('ℹ️  Alumno ya existe, continuando...', () => {",
+									"        pm.expect([201, 422]).to.include(pm.response.code);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Student\",\n  \"email\": \"student.task027@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"student\",\n  \"birth_date\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"gym_goals\": [\"ganar_masa_muscular\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.7 Login Alumno",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Login alumno exitoso', () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.access_token).to.be.a('string');",
+									"    pm.collectionVariables.set('student_token', jsonData.access_token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student.task027@test.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.8 Matricular Alumno en Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Alumno matriculado correctamente', () => {",
+									"    pm.expect([201, 200]).to.include(pm.response.code);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.student_id).to.be.a('string');",
+									"    pm.collectionVariables.set('student_id', jsonData.data.student_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student.task027@test.com\",\n  \"quota_expires_at\": \"2026-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students",
+							"host": ["{{base_url}}"],
+							"path": ["gyms", "{{gym_id}}", "students"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.9 Asignar Rutina al Alumno",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Rutina asignada correctamente', () => {",
+									"    pm.response.to.have.status(201);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.id).to.be.a('string');",
+									"    pm.expect(jsonData.data.is_current).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"routine_id\": \"{{routine_id}}\",\n  \"starts_at\": \"2026-07-15\",\n  \"is_current\": true,\n  \"notes\": \"Rutina de prueba para TASK_027\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
+							"host": ["{{base_url}}"],
+							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "routines"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. TASK_027 - Tests Funcionales",
+			"item": [
+				{
+					"name": "2.1 ✨ [NUEVO] Alumno ve sus rutinas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Estructura de respuesta correcta', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData).to.have.property('meta');",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('✅ Contiene la rutina asignada', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.length).to.be.greaterThan(0);",
+									"    ",
+									"    const routine = jsonData.data[0];",
+									"    pm.expect(routine).to.have.property('id');",
+									"    pm.expect(routine).to.have.property('starts_at');",
+									"    pm.expect(routine).to.have.property('is_current');",
+									"    pm.expect(routine).to.have.property('assigned_at');",
+									"    pm.expect(routine).to.have.property('routine');",
+									"    pm.expect(routine).to.have.property('gym');",
+									"    pm.expect(routine).to.have.property('trainer');",
+									"});",
+									"",
+									"pm.test('✅ Datos de GYM correctos', () => {",
+									"    const jsonData = pm.response.json();",
+									"    const gym = jsonData.data[0].gym;",
+									"    pm.expect(gym.name).to.equal('Gym TASK_027');",
+									"    pm.expect(gym.is_personal_training).to.be.false;",
+									"});",
+									"",
+									"pm.test('✅ Datos de TRAINER correctos', () => {",
+									"    const jsonData = pm.response.json();",
+									"    const trainer = jsonData.data[0].trainer;",
+									"    pm.expect(trainer.name).to.include('Test Trainer');",
+									"    pm.expect(trainer.email).to.equal('trainer.task027@test.com');",
+									"});",
+									"",
+									"pm.test('✅ Metadata de paginación presente', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.meta).to.have.property('current_page');",
+									"    pm.expect(jsonData.meta).to.have.property('per_page');",
+									"    pm.expect(jsonData.meta).to.have.property('total');",
+									"    pm.expect(jsonData.meta).to.have.property('last_page');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 ✨ [NUEVO] Solo rutinas actuales",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Solo rutinas con is_current=true', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.length).to.be.greaterThan(0);",
+									"    jsonData.data.forEach(routine => {",
+									"        pm.expect(routine.is_current).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines/current",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines", "current"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 ✨ Filtro por gym_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Solo rutinas del gym especificado', () => {",
+									"    const jsonData = pm.response.json();",
+									"    const gymId = pm.collectionVariables.get('gym_id');",
+									"    jsonData.data.forEach(routine => {",
+									"        pm.expect(routine.gym.id).to.equal(gymId);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines?gym_id={{gym_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"],
+							"query": [
+								{
+									"key": "gym_id",
+									"value": "{{gym_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 ✨ Filtro por dificultad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Solo rutinas intermediate', () => {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.data.forEach(routine => {",
+									"        pm.expect(routine.routine.difficulty).to.equal('intermediate');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines?difficulty=intermediate",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"],
+							"query": [
+								{
+									"key": "difficulty",
+									"value": "intermediate"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 ✨ Paginación",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Paginación correcta', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.meta.current_page).to.equal(1);",
+									"    pm.expect(jsonData.meta.per_page).to.equal(5);",
+									"    pm.expect(jsonData.data.length).to.be.at.most(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines?page=1&per_page=5",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.6 ⚠️ Trainer NO puede acceder (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 403 Forbidden', () => {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test('✅ Mensaje de error correcto', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('only for students');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}",
+								"description": "Usando token de TRAINER (debe fallar)"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.7 ⚠️ Sin autenticación (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 401 Unauthorized', () => {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. CACHE - Pruebas de rendimiento",
+			"item": [
+				{
+					"name": "3.1 🔥 Primera petición (sin caché)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('⏱️ Tiempo de respuesta registrado', () => {",
+									"    const responseTime = pm.response.responseTime;",
+									"    console.log('⏱️ Primera petición (SIN caché): ' + responseTime + 'ms');",
+									"    pm.collectionVariables.set('first_request_time', responseTime);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 ⚡ Segunda petición (CON caché)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('⚡ Respuesta más rápida con caché', () => {",
+									"    const firstTime = pm.collectionVariables.get('first_request_time');",
+									"    const cachedTime = pm.response.responseTime;",
+									"    ",
+									"    console.log('⏱️ Primera petición (SIN caché): ' + firstTime + 'ms');",
+									"    console.log('⚡ Segunda petición (CON caché): ' + cachedTime + 'ms');",
+									"    console.log('📊 Mejora: ' + Math.round((1 - cachedTime/firstTime) * 100) + '%');",
+									"    ",
+									"    // La caché debería ser más rápida o similar",
+									"    pm.expect(cachedTime).to.be.at.most(firstTime * 1.2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 🗑️ Invalidar caché (desactivar alumno)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Alumno desactivado correctamente', () => {",
+									"    pm.expect([200, 204]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/deactivate",
+							"host": ["{{base_url}}"],
+							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "deactivate"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 ✅ Verificar caché invalidada (lista vacía)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Lista vacía (alumno inactivo)', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    pm.expect(jsonData.data.length).to.equal(0);",
+									"});",
+									"",
+									"pm.test('✅ Caché se invalidó correctamente', () => {",
+									"    console.log('✅ La caché se invalidó al desactivar al alumno');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 🔄 Reactivar alumno",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Alumno reactivado correctamente', () => {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quota_expires_at\": \"2026-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/reactivate",
+							"host": ["{{base_url}}"],
+							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "reactivate"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.6 ✅ Verificar datos visibles tras reactivar",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Rutinas visibles de nuevo', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "routines"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. COMPARATIVA - Endpoint Trainer (existente)",
+			"item": [
+				{
+					"name": "4.1 Trainer lista rutinas de alumno (endpoint antiguo)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Formato diferente al de alumno', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    // Este endpoint NO tiene paginación ni filtros",
+									"    pm.expect(jsonData).to.not.have.property('meta');",
+									"});",
+									"",
+									"pm.test('ℹ️ Este es el endpoint ANTIGUO para trainers', () => {",
+									"    console.log('ℹ️ Este endpoint ya existía antes de TASK_027');",
+									"    console.log('ℹ️ El nuevo endpoint /students/me/routines es SOLO para alumnos');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
+							"host": ["{{base_url}}"],
+							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "routines"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
         'jwt.auth' => \App\Infrastructure\Http\Middleware\JwtAuthMiddleware::class,
         'rate.limit' => \App\Infrastructure\Http\Middleware\RateLimitMiddleware::class,
         'trainer.only' => \App\Infrastructure\Http\Middleware\EnsureUserIsTrainer::class,
+        'student.only' => \App\Infrastructure\Http\Middleware\StudentOnlyMiddleware::class,
     ];
 }
