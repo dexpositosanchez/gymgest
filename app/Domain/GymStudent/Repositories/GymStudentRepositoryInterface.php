@@ -24,4 +24,12 @@ interface GymStudentRepositoryInterface
     public function delete(GymStudentId $id): void;
 
     public function countActiveByGym(GymId $gymId): int;
+
+    /**
+     * Obtiene todos los gimnasios activos donde el alumno está matriculado activamente
+     *
+     * @param UserId $studentId
+     * @return array Array de objetos con: gym_student, gym, trainer
+     */
+    public function findActiveGymsByStudent(UserId $studentId): array;
 }

@@ -7,6 +7,7 @@ use App\Infrastructure\Http\Controllers\V1\GymStudentController;
 use App\Infrastructure\Http\Controllers\V1\RoutineController;
 use App\Infrastructure\Http\Controllers\V1\RoutineAssignmentController;
 use App\Infrastructure\Http\Controllers\V1\StudentRoutineController;
+use App\Infrastructure\Http\Controllers\V1\StudentGymController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -74,4 +75,7 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
 Route::middleware(['jwt.auth', 'student.only'])->group(function () {
     Route::get('students/me/routines', [StudentRoutineController::class, 'index']);
     Route::get('students/me/routines/current', [StudentRoutineController::class, 'current']);
+
+    // Student Gyms (TASK_029)
+    Route::get('students/me/gyms', [StudentGymController::class, 'index']);
 });

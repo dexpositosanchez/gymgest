@@ -12,6 +12,7 @@ use App\Domain\GymStudent\ValueObjects\GymStudentId;
 use App\Domain\User\ValueObjects\UserId;
 use App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel;
 use App\Infrastructure\Persistence\Mappers\GymStudentMapper;
+use Illuminate\Support\Facades\DB;
 
 class GymStudentEloquentRepository implements GymStudentRepositoryInterface
 {
@@ -78,5 +79,34 @@ class GymStudentEloquentRepository implements GymStudentRepositoryInterface
         return GymStudentEloquentModel::where('gym_id', $gymId->getValue())
             ->where('is_active', true)
             ->count();
+    }
+
+    public function findActiveGymsByStudent(UserId $studentId): array
+    {
+        return DB::table('gym_students')
+            ->join('gyms', 'gym_students.gym_id', '=', 'gyms.id')
+            ->join('users', 'gyms.trainer_id', '=', 'users.id')
+            ->select(
+                'gym_students.id as enrollment_id',
+                'gym_students.created_at as enrolled_at',
+                'gym_students.quota_expires_at',
+                'gyms.id as gym_id',
+                'gyms.name as gym_name',
+                'gyms.address as gym_address',
+                'gyms.locality as gym_locality',
+                'gyms.province as gym_province',
+                'gyms.country as gym_country',
+                'gyms.is_personal_training',
+                'users.id as trainer_id',
+                'users.name as trainer_name',
+                'users.last_name as trainer_last_name',
+                'users.email as trainer_email'
+            )
+            ->where('gym_students.student_id', $studentId->getValue())
+            ->where('gym_students.is_active', true)
+            ->where('gyms.is_active', true)
+            ->orderBy('gym_students.created_at', 'DESC')
+            ->get()
+            ->toArray();
     }
 }

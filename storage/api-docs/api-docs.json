@@ -1564,6 +1564,54 @@
                 ]
             }
         },
+        "/api/v1/gyms/{gymId}/students/{studentId}/deactivate": {
+            "put": {
+                "tags": [
+                    "Gym Students"
+                ],
+                "summary": "Dar de baja a un alumno activo",
+                "operationId": "9323179a12adb2e2cda14d89e2c3e7f0",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Alumno desactivado"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Alumno no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/gyms/{gymId}/students/{studentId}/reactivate": {
             "put": {
                 "tags": [
@@ -2299,6 +2347,111 @@
                 ]
             }
         },
+        "/api/v1/students/me/gyms": {
+            "get": {
+                "tags": [
+                    "Student Gyms"
+                ],
+                "summary": "List all gyms where student is actively enrolled",
+                "operationId": "f6c754860ad0ec53cfee50b4820d3459",
+                "responses": {
+                    "200": {
+                        "description": "List of gyms with enrollment details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "enrollment_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "enrolled_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "quota_expires_at": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "quota_status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "active",
+                                                            "expiring_soon",
+                                                            "expired"
+                                                        ]
+                                                    },
+                                                    "gym": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "address": {
+                                                                "type": "string"
+                                                            },
+                                                            "locality": {
+                                                                "type": "string"
+                                                            },
+                                                            "province": {
+                                                                "type": "string"
+                                                            },
+                                                            "country": {
+                                                                "type": "string"
+                                                            },
+                                                            "is_personal_training": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "trainer": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "format": "email"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not a student"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/students/me/routines": {
             "get": {
                 "tags": [
@@ -2483,6 +2636,10 @@
         {
             "name": "Routines",
             "description": "Routine management endpoints"
+        },
+        {
+            "name": "Student Gyms",
+            "description": "Student endpoints for viewing enrolled gyms"
         },
         {
             "name": "Student Routines",
