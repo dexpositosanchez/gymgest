@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "task-027-test-collection",
-		"name": "TASK_027 - Student Routine List API",
-		"description": "Colección completa para probar el endpoint de lista de rutinas para alumnos con caché y filtros",
+		"_postman_id": "gymgest-complete-collection",
+		"name": "GymGest - API Complete Collection",
+		"description": "Colección completa de endpoints de GymGest incluyendo TASK_027 (Student Routine List) y TASK_030 (Workout Session Execution)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -38,6 +38,16 @@
 		},
 		{
 			"key": "exercise_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "routine_assignment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workout_session_id",
 			"value": "",
 			"type": "string"
 		}
@@ -77,7 +87,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Trainer\",\n  \"email\": \"trainer.task027@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"trainer\",\n  \"birth_date\": \"1990-01-01\",\n  \"gender\": \"male\"\n}"
+							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Trainer\",\n  \"email\": \"trainer.test@gymgest.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"trainer\",\n  \"birth_date\": \"1990-01-01\",\n  \"gender\": \"male\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/register",
@@ -115,7 +125,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"trainer.task027@test.com\",\n  \"password\": \"password123\"\n}"
+							"raw": "{\n  \"email\": \"trainer.test@gymgest.com\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -157,7 +167,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Gym TASK_027\",\n  \"address\": \"Calle Test 123\",\n  \"locality\": \"Madrid\",\n  \"province\": \"Madrid\",\n  \"country\": \"España\",\n  \"is_personal_training\": false\n}"
+							"raw": "{\n  \"name\": \"Gym Test GymGest\",\n  \"address\": \"Calle Test 123\",\n  \"locality\": \"Madrid\",\n  \"province\": \"Madrid\",\n  \"country\": \"España\",\n  \"is_personal_training\": false\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/gyms",
@@ -235,7 +245,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Rutina TASK_027 - Fuerza\",\n  \"difficulty\": \"intermediate\",\n  \"days\": [\n    {\n      \"day_number\": 1,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": 4,\n          \"reps\": 12\n        }\n      ]\n    },\n    {\n      \"day_number\": 3,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": 3,\n          \"reps\": 10\n        }\n      ]\n    }\n  ]\n}"
+							"raw": "{\n  \"name\": \"Rutina Test - Fuerza\",\n  \"difficulty\": \"intermediate\",\n  \"days\": [\n    {\n      \"day_number\": 1,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": [\n            {\"set_number\": 1, \"reps\": 12},\n            {\"set_number\": 2, \"reps\": 10},\n            {\"set_number\": 3, \"reps\": 8}\n          ]\n        }\n      ]\n    },\n    {\n      \"day_number\": 2,\n      \"exercises\": [\n        {\n          \"exercise_id\": \"{{exercise_id}}\",\n          \"sets\": [\n            {\"set_number\": 1, \"reps\": 15},\n            {\"set_number\": 2, \"reps\": 12},\n            {\"set_number\": 3, \"reps\": 10}\n          ]\n        }\n      ]\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/routines",
@@ -276,7 +286,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Student\",\n  \"email\": \"student.task027@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"student\",\n  \"birth_date\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"gym_goals\": [\"ganar_masa_muscular\"]\n}"
+							"raw": "{\n  \"name\": \"Test\",\n  \"last_name\": \"Student\",\n  \"email\": \"student.test@gymgest.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"user_type\": \"student\",\n  \"birth_date\": \"2000-01-01\",\n  \"gender\": \"male\",\n  \"gym_goals\": [\"ganar_masa_muscular\"]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/register",
@@ -314,7 +324,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"student.task027@test.com\",\n  \"password\": \"password123\"\n}"
+							"raw": "{\n  \"email\": \"student.test@gymgest.com\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -356,7 +366,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"student.task027@test.com\",\n  \"quota_expires_at\": \"2026-12-31\"\n}"
+							"raw": "{\n  \"email\": \"student.test@gymgest.com\",\n  \"quota_expires_at\": \"2027-12-31\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/gyms/{{gym_id}}/students",
@@ -378,6 +388,7 @@
 									"    const jsonData = pm.response.json();",
 									"    pm.expect(jsonData.data.id).to.be.a('string');",
 									"    pm.expect(jsonData.data.is_current).to.be.true;",
+									"    pm.collectionVariables.set('routine_assignment_id', jsonData.data.id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -398,7 +409,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"routine_id\": \"{{routine_id}}\",\n  \"starts_at\": \"2026-07-15\",\n  \"is_current\": true,\n  \"notes\": \"Rutina de prueba para TASK_027\"\n}"
+							"raw": "{\n  \"routine_id\": \"{{routine_id}}\",\n  \"starts_at\": \"2026-07-15\",\n  \"is_current\": true,\n  \"notes\": \"Rutina de prueba para testing completo\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
@@ -411,10 +422,10 @@
 			]
 		},
 		{
-			"name": "2. TASK_027 - Tests Funcionales",
+			"name": "2. TASK_027 - Student Routine List",
 			"item": [
 				{
-					"name": "2.1 ✨ [NUEVO] Alumno ve sus rutinas",
+					"name": "2.1 ✨ Alumno ve sus rutinas",
 					"event": [
 						{
 							"listen": "test",
@@ -443,20 +454,6 @@
 									"    pm.expect(routine).to.have.property('routine');",
 									"    pm.expect(routine).to.have.property('gym');",
 									"    pm.expect(routine).to.have.property('trainer');",
-									"});",
-									"",
-									"pm.test('✅ Datos de GYM correctos', () => {",
-									"    const jsonData = pm.response.json();",
-									"    const gym = jsonData.data[0].gym;",
-									"    pm.expect(gym.name).to.equal('Gym TASK_027');",
-									"    pm.expect(gym.is_personal_training).to.be.false;",
-									"});",
-									"",
-									"pm.test('✅ Datos de TRAINER correctos', () => {",
-									"    const jsonData = pm.response.json();",
-									"    const trainer = jsonData.data[0].trainer;",
-									"    pm.expect(trainer.name).to.include('Test Trainer');",
-									"    pm.expect(trainer.email).to.equal('trainer.task027@test.com');",
 									"});",
 									"",
 									"pm.test('✅ Metadata de paginación presente', () => {",
@@ -488,7 +485,7 @@
 					"response": []
 				},
 				{
-					"name": "2.2 ✨ [NUEVO] Solo rutinas actuales",
+					"name": "2.2 ✨ Solo rutinas actuales",
 					"event": [
 						{
 							"listen": "test",
@@ -616,55 +613,7 @@
 					"response": []
 				},
 				{
-					"name": "2.5 ✨ Paginación",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Status 200', () => {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('✅ Paginación correcta', () => {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.meta.current_page).to.equal(1);",
-									"    pm.expect(jsonData.meta.per_page).to.equal(5);",
-									"    pm.expect(jsonData.data.length).to.be.at.most(5);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{student_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/students/me/routines?page=1&per_page=5",
-							"host": ["{{base_url}}"],
-							"path": ["students", "me", "routines"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "5"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "2.6 ⚠️ Trainer NO puede acceder (403)",
+					"name": "2.5 ⚠️ Trainer NO puede acceder (403)",
 					"event": [
 						{
 							"listen": "test",
@@ -699,16 +648,136 @@
 						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "3. TASK_030 - Workout Session Execution",
+			"item": [
 				{
-					"name": "2.7 ⚠️ Sin autenticación (401)",
+					"name": "3.1 🏋️ Iniciar Sesión de Entrenamiento",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('✅ Status 401 Unauthorized', () => {",
-									"    pm.response.to.have.status(401);",
+									"pm.test('✅ Status 201 - Sesión iniciada', () => {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('✅ Respuesta contiene datos de sesión', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('routine_assignment_id');",
+									"    pm.expect(jsonData).to.have.property('day_number');",
+									"    pm.expect(jsonData).to.have.property('started_at');",
+									"    pm.expect(jsonData).to.have.property('is_active');",
+									"    pm.expect(jsonData.is_active).to.be.true;",
+									"    ",
+									"    // Guardar session_id para próximos requests",
+									"    pm.collectionVariables.set('workout_session_id', jsonData.id);",
+									"    console.log('✅ Workout Session ID guardado: ' + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"routine_assignment_id\": \"{{routine_assignment_id}}\",\n  \"day_number\": 1,\n  \"notes\": \"Primera sesión de prueba desde Postman\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 ⚠️ NO permitir segunda sesión activa (409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 409 - Conflict', () => {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test('✅ Mensaje de error correcto', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('sesión activa');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"routine_assignment_id\": \"{{routine_assignment_id}}\",\n  \"day_number\": 2,\n  \"notes\": \"Intento de segunda sesión activa - debe fallar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 📋 Ver Sesión Activa con Ejercicios",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Sesión activa con ejercicios', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('day_number');",
+									"    pm.expect(jsonData).to.have.property('started_at');",
+									"    pm.expect(jsonData).to.have.property('exercises');",
+									"    pm.expect(jsonData.exercises).to.be.an('array');",
+									"    ",
+									"    if (jsonData.exercises.length > 0) {",
+									"        const exercise = jsonData.exercises[0];",
+									"        pm.expect(exercise).to.have.property('exercise_id');",
+									"        pm.expect(exercise).to.have.property('name');",
+									"        pm.expect(exercise).to.have.property('total_sets');",
+									"        pm.expect(exercise).to.have.property('completed_sets');",
+									"        pm.expect(exercise).to.have.property('is_completed');",
+									"    }",
 									"});"
 								],
 								"type": "text/javascript"
@@ -717,11 +786,397 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/students/me/routines",
+							"raw": "{{base_url}}/students/me/workout-sessions/active",
 							"host": ["{{base_url}}"],
-							"path": ["students", "me", "routines"]
+							"path": ["students", "me", "workout-sessions", "active"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 📊 Ver Sets del Ejercicio (con peso sugerido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Sets del ejercicio correctos', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('sets');",
+									"    pm.expect(jsonData).to.have.property('total_sets');",
+									"    pm.expect(jsonData).to.have.property('completed_sets');",
+									"    pm.expect(jsonData.sets).to.be.an('array');",
+									"    ",
+									"    if (jsonData.sets.length > 0) {",
+									"        const set = jsonData.sets[0];",
+									"        pm.expect(set).to.have.property('set_number');",
+									"        pm.expect(set).to.have.property('min_reps');",
+									"        pm.expect(set).to.have.property('max_reps');",
+									"        pm.expect(set).to.have.property('suggested_weight');",
+									"        pm.expect(set).to.have.property('is_completed');",
+									"        console.log('💡 Set 1 - Reps: ' + set.min_reps + '-' + set.max_reps + ', Peso sugerido: ' + set.suggested_weight);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/exercises/{{exercise_id}}/sets",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "exercises", "{{exercise_id}}", "sets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 💪 Ejecutar Set 1 (con peso)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 201 - Set ejecutado', () => {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('✅ Mensaje de éxito', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('exitosamente');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"set_number\": 1,\n  \"reps_completed\": 12,\n  \"weight_used\": 50.5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/exercises/{{exercise_id}}/sets",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "exercises", "{{exercise_id}}", "sets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.6 💪 Ejecutar Set 2 (con peso)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 201 - Set ejecutado', () => {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"set_number\": 2,\n  \"reps_completed\": 10,\n  \"weight_used\": 50.5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/exercises/{{exercise_id}}/sets",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "exercises", "{{exercise_id}}", "sets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.7 💪 Ejecutar Set 3 (sin peso - bodyweight)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 201 - Set sin peso ejecutado', () => {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"set_number\": 3,\n  \"reps_completed\": 8,\n  \"weight_used\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/exercises/{{exercise_id}}/sets",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "exercises", "{{exercise_id}}", "sets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.8 ✅ Marcar Ejercicio como Completado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 204 - Ejercicio marcado como completado', () => {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/exercises/{{exercise_id}}/mark-complete",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "exercises", "{{exercise_id}}", "mark-complete"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.9 🔚 Finalizar Sesión de Entrenamiento",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 204 - Sesión finalizada', () => {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Buena sesión, me sentí fuerte hoy\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{workout_session_id}}/finish",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "{{workout_session_id}}", "finish"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.10 📅 Ver Historial de Sesiones",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('✅ Historial con paginación', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData).to.have.property('meta');",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    ",
+									"    pm.expect(jsonData.meta).to.have.property('current_page');",
+									"    pm.expect(jsonData.meta).to.have.property('per_page');",
+									"    pm.expect(jsonData.meta).to.have.property('total');",
+									"    pm.expect(jsonData.meta).to.have.property('last_page');",
+									"    ",
+									"    console.log('📊 Total sesiones en historial: ' + jsonData.meta.total);",
+									"});",
+									"",
+									"pm.test('✅ Sesión finalizada aparece en historial', () => {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data.length > 0) {",
+									"        const session = jsonData.data[0];",
+									"        pm.expect(session).to.have.property('id');",
+									"        pm.expect(session).to.have.property('day_number');",
+									"        pm.expect(session).to.have.property('started_at');",
+									"        pm.expect(session).to.have.property('finished_at');",
+									"        pm.expect(session.finished_at).to.not.be.null;",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions?page=1&per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.11 ⚠️ Trainer NO puede acceder (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 403 Forbidden', () => {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test('✅ Mensaje de error correcto', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('only for students');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{trainer_token}}",
+								"description": "Usando token de TRAINER (debe fallar)"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/active",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "active"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.12 ⚠️ NO hay sesión activa después de finalizar (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('✅ Status 404 - No active session', () => {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test('✅ Mensaje correcto', () => {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('sesión activa');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{student_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/active",
+							"host": ["{{base_url}}"],
+							"path": ["students", "me", "workout-sessions", "active"]
 						}
 					},
 					"response": []
@@ -729,10 +1184,10 @@
 			]
 		},
 		{
-			"name": "3. CACHE - Pruebas de rendimiento",
+			"name": "4. CACHE - Pruebas TASK_027",
 			"item": [
 				{
-					"name": "3.1 🔥 Primera petición (sin caché)",
+					"name": "4.1 🔥 Primera petición (sin caché)",
 					"event": [
 						{
 							"listen": "test",
@@ -769,7 +1224,7 @@
 					"response": []
 				},
 				{
-					"name": "3.2 ⚡ Segunda petición (CON caché)",
+					"name": "4.2 ⚡ Segunda petición (CON caché)",
 					"event": [
 						{
 							"listen": "test",
@@ -807,201 +1262,6 @@
 							"raw": "{{base_url}}/students/me/routines",
 							"host": ["{{base_url}}"],
 							"path": ["students", "me", "routines"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "3.3 🗑️ Invalidar caché (desactivar alumno)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Alumno desactivado correctamente', () => {",
-									"    pm.expect([200, 204]).to.include(pm.response.code);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{trainer_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/deactivate",
-							"host": ["{{base_url}}"],
-							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "deactivate"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "3.4 ✅ Verificar caché invalidada (lista vacía)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Status 200', () => {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('✅ Lista vacía (alumno inactivo)', () => {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.be.an('array');",
-									"    pm.expect(jsonData.data.length).to.equal(0);",
-									"});",
-									"",
-									"pm.test('✅ Caché se invalidó correctamente', () => {",
-									"    console.log('✅ La caché se invalidó al desactivar al alumno');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{student_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/students/me/routines",
-							"host": ["{{base_url}}"],
-							"path": ["students", "me", "routines"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "3.5 🔄 Reactivar alumno",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Alumno reactivado correctamente', () => {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{trainer_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"quota_expires_at\": \"2026-12-31\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/reactivate",
-							"host": ["{{base_url}}"],
-							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "reactivate"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "3.6 ✅ Verificar datos visibles tras reactivar",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Status 200', () => {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('✅ Rutinas visibles de nuevo', () => {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data.length).to.be.greaterThan(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{student_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/students/me/routines",
-							"host": ["{{base_url}}"],
-							"path": ["students", "me", "routines"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "4. COMPARATIVA - Endpoint Trainer (existente)",
-			"item": [
-				{
-					"name": "4.1 Trainer lista rutinas de alumno (endpoint antiguo)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('✅ Status 200', () => {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test('✅ Formato diferente al de alumno', () => {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data).to.be.an('array');",
-									"    // Este endpoint NO tiene paginación ni filtros",
-									"    pm.expect(jsonData).to.not.have.property('meta');",
-									"});",
-									"",
-									"pm.test('ℹ️ Este es el endpoint ANTIGUO para trainers', () => {",
-									"    console.log('ℹ️ Este endpoint ya existía antes de TASK_027');",
-									"    console.log('ℹ️ El nuevo endpoint /students/me/routines es SOLO para alumnos');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{trainer_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
-							"host": ["{{base_url}}"],
-							"path": ["gyms", "{{gym_id}}", "students", "{{student_id}}", "routines"]
 						}
 					},
 					"response": []

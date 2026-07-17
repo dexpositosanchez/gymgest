@@ -8,6 +8,7 @@ use App\Infrastructure\Http\Controllers\V1\RoutineController;
 use App\Infrastructure\Http\Controllers\V1\RoutineAssignmentController;
 use App\Infrastructure\Http\Controllers\V1\StudentRoutineController;
 use App\Infrastructure\Http\Controllers\V1\StudentGymController;
+use App\Infrastructure\Http\Controllers\V1\WorkoutSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -78,4 +79,13 @@ Route::middleware(['jwt.auth', 'student.only'])->group(function () {
 
     // Student Gyms (TASK_029)
     Route::get('students/me/gyms', [StudentGymController::class, 'index']);
+
+    // Workout Session routes (TASK_030)
+    Route::post('students/me/workout-sessions', [WorkoutSessionController::class, 'start']);
+    Route::get('students/me/workout-sessions/active', [WorkoutSessionController::class, 'getActive']);
+    Route::get('students/me/workout-sessions', [WorkoutSessionController::class, 'history']);
+    Route::put('students/me/workout-sessions/{sessionId}/finish', [WorkoutSessionController::class, 'finish']);
+    Route::get('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'getSets']);
+    Route::post('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'executeSet']);
+    Route::put('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/mark-complete', [WorkoutSessionController::class, 'markExerciseComplete']);
 });

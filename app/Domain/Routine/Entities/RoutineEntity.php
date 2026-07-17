@@ -121,4 +121,14 @@ class RoutineEntity
         $this->days = $days;
         $this->updatedAt = new \DateTimeImmutable();
     }
+
+    public function hasDayNumber(int $dayNumber): bool
+    {
+        foreach ($this->days as $day) {
+            if ($day->getDayNumber()->getValue() === $dayNumber) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

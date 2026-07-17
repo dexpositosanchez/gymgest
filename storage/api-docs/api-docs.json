@@ -2605,6 +2605,505 @@
                     }
                 ]
             }
+        },
+        "/students/me/workout-sessions": {
+            "get": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Get workout session history",
+                "operationId": "42368873d323ff9d9fb492e1137788a8",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workout session history",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "day_number": {
+                                                        "type": "integer"
+                                                    },
+                                                    "started_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "finished_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Start a new workout session",
+                "operationId": "6eb172f8ec50dd74159b016e98cb8cbb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "routine_assignment_id",
+                                    "day_number"
+                                ],
+                                "properties": {
+                                    "routine_assignment_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "day_number": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Workout session started",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "routine_assignment_id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "day_number": {
+                                            "type": "integer"
+                                        },
+                                        "started_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "is_active": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Student already has active session"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/workout-sessions/active": {
+            "get": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Get active workout session with exercises",
+                "operationId": "ca39ba484475f3593208767042f502ac",
+                "responses": {
+                    "200": {
+                        "description": "Active workout session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "day_number": {
+                                            "type": "integer"
+                                        },
+                                        "started_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "exercises": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "exercise_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "total_sets": {
+                                                        "type": "integer"
+                                                    },
+                                                    "completed_sets": {
+                                                        "type": "integer"
+                                                    },
+                                                    "is_completed": {
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No active session"
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets": {
+            "get": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Get sets for an exercise in a session",
+                "operationId": "887c6438f314524d4e70f6bee6902741",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Exercise sets",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sets": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "set_number": {
+                                                        "type": "integer"
+                                                    },
+                                                    "min_reps": {
+                                                        "type": "integer"
+                                                    },
+                                                    "max_reps": {
+                                                        "type": "integer"
+                                                    },
+                                                    "rest_seconds": {
+                                                        "type": "integer"
+                                                    },
+                                                    "suggested_weight": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "nullable": true
+                                                    },
+                                                    "is_completed": {
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_sets": {
+                                            "type": "integer"
+                                        },
+                                        "completed_sets": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Execute a set",
+                "operationId": "3cdf92b687cbbcc8a95a1d3913e33ed7",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "set_number",
+                                    "reps_completed"
+                                ],
+                                "properties": {
+                                    "set_number": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "reps_completed": {
+                                        "type": "integer",
+                                        "maximum": 999,
+                                        "minimum": 1
+                                    },
+                                    "weight_used": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "maximum": 999.99,
+                                        "minimum": 0,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Set executed successfully"
+                    },
+                    "422": {
+                        "description": "Validation error or session finished"
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/mark-complete": {
+            "put": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Mark exercise as complete manually",
+                "operationId": "334f9a9c53c5883f6b1548b0dfdd6957",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "exerciseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Exercise marked as complete"
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/workout-sessions/{sessionId}/finish": {
+            "put": {
+                "tags": [
+                    "Student Workout Sessions"
+                ],
+                "summary": "Finish workout session",
+                "operationId": "626d5d2bee9575098c3161a5e5831d90",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "notes": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Session finished successfully"
+                    },
+                    "422": {
+                        "description": "Session already finished or not found"
+                    },
+                    "403": {
+                        "description": "Only students can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -2644,6 +3143,10 @@
         {
             "name": "Student Routines",
             "description": "Student endpoints for viewing assigned routines"
+        },
+        {
+            "name": "Student Workout Sessions",
+            "description": "Student workout session management endpoints"
         },
         {
             "name": "Authentication",

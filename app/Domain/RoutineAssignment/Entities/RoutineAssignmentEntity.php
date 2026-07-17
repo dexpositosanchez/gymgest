@@ -11,7 +11,7 @@ use App\Domain\Routine\ValueObjects\RoutineId;
 use App\Domain\User\ValueObjects\UserId;
 use App\Domain\Gym\ValueObjects\GymId;
 
-final class RoutineAssignmentEntity
+class RoutineAssignmentEntity
 {
     private $id;
     private $routineId;

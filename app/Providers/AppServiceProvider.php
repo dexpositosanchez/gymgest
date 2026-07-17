@@ -7,9 +7,14 @@ use App\Domain\Exercise\Repositories\ExerciseRepositoryInterface;
 use App\Domain\Exercise\Repositories\MuscleGroupRepositoryInterface;
 use App\Domain\Exercise\Repositories\TrainerExercisePreferenceRepositoryInterface;
 use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
+use App\Domain\Routine\Repositories\RoutineDayExerciseRepositoryInterface;
+use App\Domain\Routine\Repositories\ExerciseSetRepositoryInterface;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\RoutineAssignment\Repositories\RoutineAssignmentRepositoryInterface;
+use App\Domain\WorkoutSession\Repositories\WorkoutSessionRepositoryInterface;
+use App\Domain\SetExecution\Repositories\SetExecutionRepositoryInterface;
+use App\Domain\ExerciseWeightHistory\Repositories\ExerciseWeightHistoryRepositoryInterface;
 use App\Infrastructure\Persistence\Eloquent\UserEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\ExerciseEloquentRepository;
 use App\Application\RoutineAssignment\Services\RoutineAssignmentResponseBuilderInterface;
@@ -20,6 +25,11 @@ use App\Infrastructure\Persistence\Repositories\RoutineEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\GymEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\GymStudentEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\RoutineAssignmentEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\WorkoutSessionEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\SetExecutionEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\ExerciseWeightHistoryEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\RoutineDayExerciseEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\ExerciseSetEloquentRepository;
 use App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel;
 use App\Infrastructure\Persistence\Observers\GymStudentObserver;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +71,16 @@ class AppServiceProvider extends ServiceProvider
             RoutineEloquentRepository::class
         );
 
+        $this->app->bind(
+            RoutineDayExerciseRepositoryInterface::class,
+            RoutineDayExerciseEloquentRepository::class
+        );
+
+        $this->app->bind(
+            ExerciseSetRepositoryInterface::class,
+            ExerciseSetEloquentRepository::class
+        );
+
         // Gym repositories
         $this->app->bind(
             GymRepositoryInterface::class,
@@ -77,6 +97,24 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             RoutineAssignmentRepositoryInterface::class,
             RoutineAssignmentEloquentRepository::class
+        );
+
+        // WorkoutSession repositories
+        $this->app->bind(
+            WorkoutSessionRepositoryInterface::class,
+            WorkoutSessionEloquentRepository::class
+        );
+
+        // SetExecution repositories
+        $this->app->bind(
+            SetExecutionRepositoryInterface::class,
+            SetExecutionEloquentRepository::class
+        );
+
+        // ExerciseWeightHistory repositories
+        $this->app->bind(
+            ExerciseWeightHistoryRepositoryInterface::class,
+            ExerciseWeightHistoryEloquentRepository::class
         );
 
         // Infrastructure services
