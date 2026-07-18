@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 
-class CreateExerciseRequest extends FormRequest
+
+class CreateExerciseRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

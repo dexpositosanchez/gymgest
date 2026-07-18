@@ -6,10 +6,10 @@ namespace App\Infrastructure\Http\Requests;
 
 use App\Domain\User\ValueObjects\UserType;
 use App\Domain\User\ValueObjects\Gender;
-use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Validation\Rule;
 
-class RegisterUserRequest extends FormRequest
+class RegisterUserRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

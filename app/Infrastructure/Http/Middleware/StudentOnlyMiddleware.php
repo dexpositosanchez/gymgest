@@ -7,6 +7,7 @@ namespace App\Infrastructure\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class StudentOnlyMiddleware
 {
@@ -17,12 +18,20 @@ class StudentOnlyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->user_type !== 'student') {
-            return response()->json([
-                'error' => 'This endpoint is only for students'
-            ], 403);
-        }
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        return $next($request);
+            if (!$user || $user->user_type !== 'student') {
+                return response()->json([
+                    'error' => 'This endpoint is only for students'
+                ], 403);
+            }
+
+            return $next($request);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Unauthenticated'
+            ], 401);
+        }
     }
 }

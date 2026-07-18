@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class ExecuteSetRequest extends FormRequest
+class ExecuteSetRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

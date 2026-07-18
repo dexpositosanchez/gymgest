@@ -8,6 +8,7 @@ use App\Domain\SetExecution\Repositories\SetExecutionRepositoryInterface;
 use App\Domain\WorkoutSession\ValueObjects\WorkoutSessionId;
 use App\Domain\Exercise\ValueObjects\ExerciseId;
 use App\Domain\ExerciseWeightHistory\Repositories\ExerciseWeightHistoryRepositoryInterface;
+use App\Domain\ExerciseWeightHistory\ValueObjects\Reps;
 use App\Domain\Routine\Repositories\ExerciseSetRepositoryInterface;
 use App\Domain\Routine\Repositories\RoutineDayExerciseRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
@@ -72,15 +73,18 @@ class GetExerciseSetsUseCase
             $completedSets
         );
 
-        // Get suggested weight
-        $suggestedWeight = $this->historyRepository->findSuggestedWeight($studentIdVO, $exerciseIdVO);
-
         $sets = [];
         foreach ($exerciseSets as $exerciseSet) {
             $setNumber = $exerciseSet->getSetNumber()->getValue();
+            $reps = $exerciseSet->getReps()->getValue();
+
+            // Get suggested weight specific to this set's reps count
+            $repsVO = new Reps($reps);
+            $suggestedWeight = $this->historyRepository->findSuggestedWeight($studentIdVO, $exerciseIdVO, $repsVO);
+
             $sets[] = [
                 'set_number' => $setNumber,
-                'reps' => $exerciseSet->getReps()->getValue(),
+                'reps' => $reps,
                 'suggested_weight' => $suggestedWeight,
                 'is_completed' => in_array($setNumber, $completedSetNumbers),
             ];

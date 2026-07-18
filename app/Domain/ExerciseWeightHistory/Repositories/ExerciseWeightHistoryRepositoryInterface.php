@@ -19,5 +19,5 @@ interface ExerciseWeightHistoryRepositoryInterface
         Reps $reps
     ): ?ExerciseWeightHistoryEntity;
 
-    public function findSuggestedWeight(UserId $studentId, ExerciseId $exerciseId): ?float;
+    public function findSuggestedWeight(UserId $studentId, ExerciseId $exerciseId, Reps $reps): ?float;
 }

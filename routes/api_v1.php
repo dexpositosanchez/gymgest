@@ -9,6 +9,7 @@ use App\Infrastructure\Http\Controllers\V1\RoutineAssignmentController;
 use App\Infrastructure\Http\Controllers\V1\StudentRoutineController;
 use App\Infrastructure\Http\Controllers\V1\StudentGymController;
 use App\Infrastructure\Http\Controllers\V1\WorkoutSessionController;
+use App\Infrastructure\Http\Controllers\V1\StatisticsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -20,6 +21,31 @@ Route::prefix('auth')->group(function () {
     Route::post('email/resend', [AuthController::class, 'resend']);
     Route::post('password/email', [AuthController::class, 'requestPasswordReset']);
     Route::post('password/reset', [AuthController::class, 'resetPassword']);
+});
+
+// Student routes - MUST be before trainer routes to avoid route conflicts
+// (students/me/... must match before students/{studentId}/...)
+Route::middleware(['jwt.auth', 'student.only'])->group(function () {
+    Route::get('students/me/routines', [StudentRoutineController::class, 'index']);
+    Route::get('students/me/routines/current', [StudentRoutineController::class, 'current']);
+
+    // Student Gyms (TASK_029)
+    Route::get('students/me/gyms', [StudentGymController::class, 'index']);
+
+    // Workout Session routes (TASK_030)
+    Route::post('students/me/workout-sessions', [WorkoutSessionController::class, 'start']);
+    Route::get('students/me/workout-sessions/active', [WorkoutSessionController::class, 'getActive']);
+    Route::get('students/me/workout-sessions', [WorkoutSessionController::class, 'history']);
+    Route::put('students/me/workout-sessions/{sessionId}/finish', [WorkoutSessionController::class, 'finish']);
+    Route::get('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'getSets']);
+    Route::post('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'executeSet']);
+    Route::put('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/mark-complete', [WorkoutSessionController::class, 'markExerciseComplete']);
+
+    // Statistics routes - Student endpoints (TASK_031 + TASK_032)
+    Route::get('students/me/statistics/routines', [StatisticsController::class, 'myRoutineStats']);
+    Route::get('students/me/statistics/exercise-weight-history', [StatisticsController::class, 'myExerciseWeightHistory']);
+    Route::get('students/me/statistics/exercises-executed', [StatisticsController::class, 'myExecutedExercises']);
+    Route::get('students/me/gyms/{gymId}/statistics/active-students', [StatisticsController::class, 'myGymActiveStudents']);
 });
 
 // Exercise routes - require authentication and trainer role
@@ -70,22 +96,10 @@ Route::middleware(['jwt.auth', 'trainer.only'])->group(function () {
 
     // List all students from all trainer's gyms
     Route::get('students', [GymStudentController::class, 'listAll']);
-});
 
-// Student Routine routes - require authentication and student role
-Route::middleware(['jwt.auth', 'student.only'])->group(function () {
-    Route::get('students/me/routines', [StudentRoutineController::class, 'index']);
-    Route::get('students/me/routines/current', [StudentRoutineController::class, 'current']);
-
-    // Student Gyms (TASK_029)
-    Route::get('students/me/gyms', [StudentGymController::class, 'index']);
-
-    // Workout Session routes (TASK_030)
-    Route::post('students/me/workout-sessions', [WorkoutSessionController::class, 'start']);
-    Route::get('students/me/workout-sessions/active', [WorkoutSessionController::class, 'getActive']);
-    Route::get('students/me/workout-sessions', [WorkoutSessionController::class, 'history']);
-    Route::put('students/me/workout-sessions/{sessionId}/finish', [WorkoutSessionController::class, 'finish']);
-    Route::get('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'getSets']);
-    Route::post('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets', [WorkoutSessionController::class, 'executeSet']);
-    Route::put('students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/mark-complete', [WorkoutSessionController::class, 'markExerciseComplete']);
+    // Statistics routes - Trainer endpoints (TASK_031 + TASK_032)
+    Route::get('students/{studentId}/statistics/routines', [StatisticsController::class, 'studentRoutineStats']);
+    Route::get('students/{studentId}/statistics/exercise-weight-history', [StatisticsController::class, 'studentExerciseWeightHistory']);
+    Route::get('students/{studentId}/statistics/exercises-executed', [StatisticsController::class, 'studentExecutedExercises']);
+    Route::get('gyms/{gymId}/statistics/active-students', [StatisticsController::class, 'gymActiveStudents']);
 });

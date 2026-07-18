@@ -51,10 +51,11 @@ class ExerciseWeightHistoryEloquentRepository implements ExerciseWeightHistoryRe
         return ExerciseWeightHistoryMapper::toDomain($model);
     }
 
-    public function findSuggestedWeight(UserId $studentId, ExerciseId $exerciseId): ?float
+    public function findSuggestedWeight(UserId $studentId, ExerciseId $exerciseId, Reps $reps): ?float
     {
         $record = ExerciseWeightHistoryEloquentModel::where('student_id', $studentId->getValue())
             ->where('exercise_id', $exerciseId->getValue())
+            ->where('reps', $reps->getValue())
             ->orderBy('last_used_at', 'desc')
             ->first();
 

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class FinishWorkoutSessionRequest extends FormRequest
+class FinishWorkoutSessionRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

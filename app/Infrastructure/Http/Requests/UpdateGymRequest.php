@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateGymRequest extends FormRequest
+
+class UpdateGymRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

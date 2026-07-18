@@ -609,4 +609,169 @@ class WorkoutSessionManagementTest extends TestCase
         $secondExecution->assertStatus(422)
             ->assertJson(['error' => 'Esta serie ya ha sido ejecutada']);
     }
+
+    // =======================
+    // BUGFIX TESTS - Suggested Weight by Reps
+    // =======================
+
+    public function test_suggested_weight_is_specific_to_reps_count(): void
+    {
+        // Create a routine with 1 exercise configured with sets of different reps
+        $muscleGroup = \DB::table('muscle_groups')->insertGetId([
+            'id' => Str::uuid()->toString(),
+            'name' => 'Legs',
+            'description' => 'Leg muscles',
+        ], 'id');
+
+        $exercise = \DB::table('exercises')->insertGetId([
+            'id' => Str::uuid()->toString(),
+            'muscle_group_id' => $muscleGroup,
+            'name' => 'Squat',
+            'description' => 'Squat exercise',
+            'is_default' => true,
+        ], 'id');
+
+        $routineDay = \DB::table('routine_days')->where('routine_id', $this->routine->id)->first();
+
+        // Add exercise with mixed reps: set 1-2 with 8 reps, set 3 with 12 reps
+        $routineDayExercise = \DB::table('routine_day_exercises')->insertGetId([
+            'id' => Str::uuid()->toString(),
+            'routine_day_id' => $routineDay->id,
+            'exercise_id' => $exercise,
+            'order_index' => 3,
+            'notes' => null,
+        ], 'id');
+
+        // Set 1 and 2: 8 reps
+        for ($i = 1; $i <= 2; $i++) {
+            \DB::table('routine_day_exercise_sets')->insert([
+                'id' => Str::uuid()->toString(),
+                'routine_day_exercise_id' => $routineDayExercise,
+                'set_number' => $i,
+                'reps' => 8,
+            ]);
+        }
+
+        // Set 3: 12 reps
+        \DB::table('routine_day_exercise_sets')->insert([
+            'id' => Str::uuid()->toString(),
+            'routine_day_exercise_id' => $routineDayExercise,
+            'set_number' => 3,
+            'reps' => 12,
+        ]);
+
+        // Create a previous session where student used 100kg for 8 reps and 80kg for 12 reps
+        $previousSession = \DB::table('workout_sessions')->insertGetId([
+            'id' => Str::uuid()->toString(),
+            'routine_assignment_id' => $this->assignment->id,
+            'student_id' => $this->student->id,
+            'day_number' => 1,
+            'started_at' => now()->subDays(7),
+            'finished_at' => now()->subDays(7)->addHour(),
+            'is_active' => false,
+            'created_at' => now()->subDays(7),
+            'updated_at' => now()->subDays(7),
+        ], 'id');
+
+        // Execute set 1 (8 reps) with 100kg
+        \DB::table('set_executions')->insert([
+            'id' => Str::uuid()->toString(),
+            'workout_session_id' => $previousSession,
+            'routine_day_exercise_id' => $routineDayExercise,
+            'exercise_id' => $exercise,
+            'set_number' => 1,
+            'reps_completed' => 8,
+            'weight_used' => 100.0,
+            'completed_at' => now()->subDays(7),
+            'created_at' => now()->subDays(7),
+            'updated_at' => now()->subDays(7),
+        ]);
+
+        // Execute set 3 (12 reps) with 80kg - done AFTER set 1
+        \DB::table('set_executions')->insert([
+            'id' => Str::uuid()->toString(),
+            'workout_session_id' => $previousSession,
+            'routine_day_exercise_id' => $routineDayExercise,
+            'exercise_id' => $exercise,
+            'set_number' => 3,
+            'reps_completed' => 12,
+            'weight_used' => 80.0,
+            'completed_at' => now()->subDays(7)->addMinutes(10),
+            'created_at' => now()->subDays(7)->addMinutes(10),
+            'updated_at' => now()->subDays(7)->addMinutes(10),
+        ]);
+
+        // Update weight history
+        \DB::table('exercise_weight_history')->insert([
+            [
+                'id' => Str::uuid()->toString(),
+                'student_id' => $this->student->id,
+                'exercise_id' => $exercise,
+                'reps' => 8,
+                'weight' => 100.0,
+                'last_used_at' => now()->subDays(7),
+                'created_at' => now()->subDays(7),
+                'updated_at' => now()->subDays(7),
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'student_id' => $this->student->id,
+                'exercise_id' => $exercise,
+                'reps' => 12,
+                'weight' => 80.0,
+                'last_used_at' => now()->subDays(7)->addMinutes(10),
+                'created_at' => now()->subDays(7)->addMinutes(10),
+                'updated_at' => now()->subDays(7)->addMinutes(10),
+            ],
+        ]);
+
+        // Start a new session
+        $newSessionResponse = $this->postJson(
+            '/api/v1/students/me/workout-sessions',
+            [
+                'routine_assignment_id' => $this->assignment->id,
+                'day_number' => 1,
+            ],
+            [
+                'Authorization' => 'Bearer ' . $this->studentToken,
+            ]
+        );
+
+        $newSessionId = $newSessionResponse->json('id');
+
+        // Get sets for this exercise
+        $response = $this->getJson(
+            "/api/v1/students/me/workout-sessions/{$newSessionId}/exercises/{$exercise}/sets",
+            [
+                'Authorization' => 'Bearer ' . $this->studentToken,
+            ]
+        );
+
+        $response->assertStatus(200);
+        $sets = $response->json('sets');
+
+        // Verify we have 3 sets
+        $this->assertCount(3, $sets);
+
+        // BUG: Before fix, all sets get suggested_weight=80kg (most recent overall)
+        // EXPECTED: Sets 1-2 (8 reps) should suggest 100kg, Set 3 (12 reps) should suggest 80kg
+
+        // Set 1: 8 reps → should suggest 100kg
+        $this->assertEquals(1, $sets[0]['set_number']);
+        $this->assertEquals(8, $sets[0]['reps']);
+        $this->assertEquals(100.0, $sets[0]['suggested_weight'],
+            "Set 1 (8 reps) should suggest 100kg, not the most recent weight overall");
+
+        // Set 2: 8 reps → should suggest 100kg
+        $this->assertEquals(2, $sets[1]['set_number']);
+        $this->assertEquals(8, $sets[1]['reps']);
+        $this->assertEquals(100.0, $sets[1]['suggested_weight'],
+            "Set 2 (8 reps) should suggest 100kg, not the most recent weight overall");
+
+        // Set 3: 12 reps → should suggest 80kg
+        $this->assertEquals(3, $sets[2]['set_number']);
+        $this->assertEquals(12, $sets[2]['reps']);
+        $this->assertEquals(80.0, $sets[2]['suggested_weight'],
+            "Set 3 (12 reps) should suggest 80kg");
+    }
 }
