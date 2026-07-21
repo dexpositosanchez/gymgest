@@ -19,8 +19,8 @@ Route::prefix('auth')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
     Route::post('email/resend', [AuthController::class, 'resend']);
-    Route::post('password/email', [AuthController::class, 'requestPasswordReset']);
-    Route::post('password/reset', [AuthController::class, 'resetPassword']);
+    Route::post('password/email', [AuthController::class, 'requestPasswordReset'])->middleware('throttle:6,1');
+    Route::post('password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1');
 });
 
 // Student routes - MUST be before trainer routes to avoid route conflicts

@@ -32,4 +32,13 @@ interface GymStudentRepositoryInterface
      * @return array Array de objetos con: gym_student, gym, trainer
      */
     public function findActiveGymsByStudent(UserId $studentId): array;
+
+    /**
+     * Verifica si un estudiante pertenece a algún gimnasio del entrenador
+     *
+     * @param UserId $studentId
+     * @param UserId $trainerId
+     * @return bool
+     */
+    public function studentBelongsToTrainer(UserId $studentId, UserId $trainerId): bool;
 }

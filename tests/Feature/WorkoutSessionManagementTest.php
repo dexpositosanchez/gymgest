@@ -352,7 +352,7 @@ class WorkoutSessionManagementTest extends TestCase
         $sessionId = $sessionResponse->json('id');
         $exerciseId = $this->routine->days[0]->exercises[0]->exercise_id;
 
-        // Execute first set
+        // Execute first set with 50kg
         $this->postJson("/api/v1/students/me/workout-sessions/{$sessionId}/exercises/{$exerciseId}/sets", [
             'set_number' => 1,
             'reps_completed' => 10,
@@ -363,11 +363,19 @@ class WorkoutSessionManagementTest extends TestCase
 
         $firstTimestamp = \DB::table('exercise_weight_history')
             ->where('student_id', $this->student->id)
+            ->where('exercise_id', $exerciseId)
+            ->where('reps', 10)
             ->value('last_used_at');
+
+        $firstCount = \DB::table('exercise_weight_history')
+            ->where('student_id', $this->student->id)
+            ->where('exercise_id', $exerciseId)
+            ->where('reps', 10)
+            ->count();
 
         sleep(1);
 
-        // Execute second set with same weight
+        // Execute second set with same weight (50kg)
         $this->postJson("/api/v1/students/me/workout-sessions/{$sessionId}/exercises/{$exerciseId}/sets", [
             'set_number' => 2,
             'reps_completed' => 10,
@@ -376,12 +384,36 @@ class WorkoutSessionManagementTest extends TestCase
             'Authorization' => 'Bearer ' . $this->studentToken,
         ]);
 
+        // Execute third set with same weight (50kg)
+        $this->postJson("/api/v1/students/me/workout-sessions/{$sessionId}/exercises/{$exerciseId}/sets", [
+            'set_number' => 3,
+            'reps_completed' => 10,
+            'weight_used' => 50.0,
+        ], [
+            'Authorization' => 'Bearer ' . $this->studentToken,
+        ]);
+
         $secondTimestamp = \DB::table('exercise_weight_history')
             ->where('student_id', $this->student->id)
+            ->where('exercise_id', $exerciseId)
+            ->where('reps', 10)
             ->value('last_used_at');
 
+        $secondCount = \DB::table('exercise_weight_history')
+            ->where('student_id', $this->student->id)
+            ->where('exercise_id', $exerciseId)
+            ->where('reps', 10)
+            ->count();
+
         // Timestamp should NOT have changed
-        $this->assertEquals($firstTimestamp, $secondTimestamp);
+        $this->assertEquals($firstTimestamp, $secondTimestamp,
+            'El timestamp no debería cambiar cuando el peso es el mismo');
+
+        // Should have exactly 1 record, not multiple duplicates
+        $this->assertEquals(1, $firstCount,
+            'Debería haber exactamente 1 registro después de la primera serie');
+        $this->assertEquals(1, $secondCount,
+            'Debería seguir habiendo exactamente 1 registro después de series con mismo peso (no duplicados)');
     }
 
     public function test_suggested_weight_is_null_when_no_history_exists(): void
@@ -613,6 +645,70 @@ class WorkoutSessionManagementTest extends TestCase
     // =======================
     // BUGFIX TESTS - Suggested Weight by Reps
     // =======================
+
+    // =======================
+    // TASK_034 BUGFIX TESTS
+    // =======================
+
+    public function test_cannot_execute_set_with_invalid_set_number(): void
+    {
+        // Start workout session
+        $sessionResponse = $this->postJson('/api/v1/students/me/workout-sessions', [
+            'routine_assignment_id' => $this->assignment->id,
+            'day_number' => 1,
+        ], [
+            'Authorization' => 'Bearer ' . $this->studentToken,
+        ]);
+
+        $sessionId = $sessionResponse->json('id');
+        $exerciseId = $this->routine->days[0]->exercises[0]->exercise_id;
+
+        // Try to execute set number 99 (doesn't exist - only 3 sets configured)
+        $response = $this->postJson(
+            "/api/v1/students/me/workout-sessions/{$sessionId}/exercises/{$exerciseId}/sets",
+            [
+                'set_number' => 99,
+                'reps_completed' => 10,
+                'weight_used' => 50.0,
+            ],
+            [
+                'Authorization' => 'Bearer ' . $this->studentToken,
+            ]
+        );
+
+        $response->assertStatus(422)
+            ->assertJson(['error' => 'El número de serie no existe en la configuración del ejercicio']);
+    }
+
+    public function test_cannot_execute_set_with_mismatched_reps(): void
+    {
+        // Start workout session
+        $sessionResponse = $this->postJson('/api/v1/students/me/workout-sessions', [
+            'routine_assignment_id' => $this->assignment->id,
+            'day_number' => 1,
+        ], [
+            'Authorization' => 'Bearer ' . $this->studentToken,
+        ]);
+
+        $sessionId = $sessionResponse->json('id');
+        $exerciseId = $this->routine->days[0]->exercises[0]->exercise_id;
+
+        // Try to execute set 1 with 15 reps (configured with 10 reps)
+        $response = $this->postJson(
+            "/api/v1/students/me/workout-sessions/{$sessionId}/exercises/{$exerciseId}/sets",
+            [
+                'set_number' => 1,
+                'reps_completed' => 15,  // Should be 10
+                'weight_used' => 50.0,
+            ],
+            [
+                'Authorization' => 'Bearer ' . $this->studentToken,
+            ]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonFragment(['error' => 'Las repeticiones completadas (15) no coinciden con las configuradas (10)']);
+    }
 
     public function test_suggested_weight_is_specific_to_reps_count(): void
     {

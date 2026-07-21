@@ -6,6 +6,7 @@ namespace App\Infrastructure\Http\Controllers\V1;
 
 use App\Application\WorkoutSession\UseCases\StartWorkoutSessionUseCase;
 use App\Application\WorkoutSession\UseCases\GetActiveWorkoutSessionUseCase;
+use App\Application\WorkoutSession\UseCases\GetActiveWorkoutSessionDetailsUseCase;
 use App\Application\WorkoutSession\UseCases\FinishWorkoutSessionUseCase;
 use App\Application\WorkoutSession\UseCases\GetWorkoutHistoryUseCase;
 use App\Application\WorkoutSession\UseCases\MarkExerciseCompleteUseCase;
@@ -15,10 +16,6 @@ use App\Infrastructure\Http\Controllers\Controller;
 use App\Infrastructure\Http\Requests\StartWorkoutSessionRequest;
 use App\Infrastructure\Http\Requests\ExecuteSetRequest;
 use App\Infrastructure\Http\Requests\FinishWorkoutSessionRequest;
-use App\Infrastructure\Persistence\Eloquent\WorkoutSessionEloquentModel;
-use App\Infrastructure\Persistence\Eloquent\SetExecutionEloquentModel;
-use App\Infrastructure\Persistence\Eloquent\WorkoutSessionExerciseStatusEloquentModel;
-use App\Infrastructure\Persistence\Eloquent\RoutineAssignmentEloquentModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -35,6 +32,9 @@ class WorkoutSessionController extends Controller
 
     /** @var GetActiveWorkoutSessionUseCase */
     private $getActiveWorkoutSessionUseCase;
+
+    /** @var GetActiveWorkoutSessionDetailsUseCase */
+    private $getActiveWorkoutSessionDetailsUseCase;
 
     /** @var FinishWorkoutSessionUseCase */
     private $finishWorkoutSessionUseCase;
@@ -54,6 +54,7 @@ class WorkoutSessionController extends Controller
     public function __construct(
         StartWorkoutSessionUseCase $startWorkoutSessionUseCase,
         GetActiveWorkoutSessionUseCase $getActiveWorkoutSessionUseCase,
+        GetActiveWorkoutSessionDetailsUseCase $getActiveWorkoutSessionDetailsUseCase,
         FinishWorkoutSessionUseCase $finishWorkoutSessionUseCase,
         GetWorkoutHistoryUseCase $getWorkoutHistoryUseCase,
         ExecuteSetUseCase $executeSetUseCase,
@@ -62,6 +63,7 @@ class WorkoutSessionController extends Controller
     ) {
         $this->startWorkoutSessionUseCase = $startWorkoutSessionUseCase;
         $this->getActiveWorkoutSessionUseCase = $getActiveWorkoutSessionUseCase;
+        $this->getActiveWorkoutSessionDetailsUseCase = $getActiveWorkoutSessionDetailsUseCase;
         $this->finishWorkoutSessionUseCase = $finishWorkoutSessionUseCase;
         $this->getWorkoutHistoryUseCase = $getWorkoutHistoryUseCase;
         $this->executeSetUseCase = $executeSetUseCase;
@@ -172,46 +174,13 @@ class WorkoutSessionController extends Controller
                 return response()->json(['error' => 'This endpoint is only for students'], 403);
             }
 
-            $session = $this->getActiveWorkoutSessionUseCase->execute(auth()->user()->id);
+            $details = $this->getActiveWorkoutSessionDetailsUseCase->execute(auth()->user()->id);
 
-            if ($session === null) {
+            if ($details === null) {
                 return response()->json(['error' => 'No tienes una sesión activa'], 404);
             }
 
-            // Get exercises for this session
-            $assignment = RoutineAssignmentEloquentModel::with([
-                'routine.days.exercises.exercise',
-                'routine.days.exercises.sets'
-            ])->find($session->getRoutineAssignmentId()->getValue());
-
-            $day = $assignment->routine->days->firstWhere('day_number', $session->getDayNumber()->getValue());
-
-            $exercises = [];
-            foreach ($day->exercises as $routineDayExercise) {
-                $completedSets = SetExecutionEloquentModel::where('workout_session_id', $session->getId()->getValue())
-                    ->where('exercise_id', $routineDayExercise->exercise_id)
-                    ->count();
-
-                $isCompleted = WorkoutSessionExerciseStatusEloquentModel::where('workout_session_id', $session->getId()->getValue())
-                    ->where('exercise_id', $routineDayExercise->exercise_id)
-                    ->where('is_completed', true)
-                    ->exists();
-
-                $exercises[] = [
-                    'exercise_id' => $routineDayExercise->exercise_id,
-                    'name' => $routineDayExercise->exercise->name,
-                    'total_sets' => $routineDayExercise->sets->count(),
-                    'completed_sets' => $completedSets,
-                    'is_completed' => $isCompleted,
-                ];
-            }
-
-            return response()->json([
-                'id' => $session->getId()->getValue(),
-                'day_number' => $session->getDayNumber()->getValue(),
-                'started_at' => $session->getStartedAt()->format('Y-m-d H:i:s'),
-                'exercises' => $exercises,
-            ], 200);
+            return response()->json($details, 200);
 
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al obtener sesión activa'], 500);
@@ -244,18 +213,17 @@ class WorkoutSessionController extends Controller
      *                 property="sets",
      *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="set_number", type="integer"),
-     *                     @OA\Property(property="min_reps", type="integer"),
-     *                     @OA\Property(property="max_reps", type="integer"),
-     *                     @OA\Property(property="rest_seconds", type="integer"),
-     *                     @OA\Property(property="suggested_weight", type="number", format="float", nullable=true),
-     *                     @OA\Property(property="is_completed", type="boolean")
+     *                     @OA\Property(property="set_number", type="integer", description="Set number (1, 2, 3, etc.)"),
+     *                     @OA\Property(property="reps", type="integer", description="Configured number of reps for this set"),
+     *                     @OA\Property(property="suggested_weight", type="number", format="float", nullable=true, description="Suggested weight based on history (null if no history)"),
+     *                     @OA\Property(property="is_completed", type="boolean", description="Whether this set has been executed")
      *                 )
      *             ),
      *             @OA\Property(property="total_sets", type="integer"),
      *             @OA\Property(property="completed_sets", type="integer")
      *         )
      *     ),
+     *     @OA\Response(response=422, description="Exercise does not belong to session"),
      *     @OA\Response(response=403, description="Only students can access this endpoint")
      * )
      */
@@ -282,6 +250,7 @@ class WorkoutSessionController extends Controller
      * @OA\Post(
      *     path="/students/me/workout-sessions/{sessionId}/exercises/{exerciseId}/sets",
      *     summary="Execute a set",
+     *     description="Execute a set in a workout session. Validates that set_number exists in routine configuration and that reps_completed matches configured reps. Updates weight history only when weight changes.",
      *     tags={"Student Workout Sessions"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -300,16 +269,25 @@ class WorkoutSessionController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"set_number", "reps_completed"},
-     *             @OA\Property(property="set_number", type="integer", minimum=1),
-     *             @OA\Property(property="reps_completed", type="integer", minimum=1, maximum=999),
-     *             @OA\Property(property="weight_used", type="number", format="float", minimum=0, maximum=999.99, nullable=true)
+     *             @OA\Property(property="set_number", type="integer", minimum=1, description="Must be a valid set number from routine configuration"),
+     *             @OA\Property(property="reps_completed", type="integer", minimum=1, maximum=999, description="Must exactly match the configured reps for this set"),
+     *             @OA\Property(property="weight_used", type="number", format="float", minimum=0, maximum=999.99, nullable=true, description="Weight used in kg (optional for bodyweight exercises)")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Set executed successfully"
+     *         description="Set executed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Serie ejecutada exitosamente")
+     *         )
      *     ),
-     *     @OA\Response(response=422, description="Validation error or session finished"),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error. Possible errors: (1) Set number doesn't exist in routine, (2) Reps completed don't match configured reps, (3) Set already executed, (4) Session already finished",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="El número de serie no existe en la configuración del ejercicio")
+     *         )
+     *     ),
      *     @OA\Response(response=403, description="Only students can access this endpoint")
      * )
      */

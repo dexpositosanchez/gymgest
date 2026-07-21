@@ -185,4 +185,77 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422)
                 ->assertJsonValidationErrors(['password']);
     }
+
+    public function test_password_reset_request_is_rate_limited()
+    {
+        // Clear rate limiter cache to ensure clean state
+        \Illuminate\Support\Facades\Cache::flush();
+
+        $user = new UserEloquentModel();
+        $user->id = \App\Domain\User\ValueObjects\UserId::generate()->getValue();
+        $user->email = 'ratelimit_test@example.com'; // Unique email to avoid conflicts
+        $user->password = Hash::make('Password123');
+        $user->user_type = 'trainer';
+        $user->name = 'Test';
+        $user->last_name = 'Trainer';
+        $user->birth_date = '1990-01-01';
+        $user->gender = 'male';
+        $user->gym_goals = null;
+        $user->email_verified_at = now();
+        $user->save();
+
+        // Make 7 requests - at least one should be rate limited
+        $responses = [];
+        for ($i = 0; $i < 7; $i++) {
+            $responses[] = $this->postJson('/api/v1/auth/password/email', [
+                'email' => 'ratelimit_test@example.com'
+            ]);
+        }
+
+        // At least the last request should be rate limited (429)
+        $this->assertEquals(429, $responses[6]->status(),
+            'The 7th request should be rate limited with HTTP 429');
+    }
+
+    public function test_password_reset_is_rate_limited()
+    {
+        // Clear rate limiter cache to ensure clean state
+        \Illuminate\Support\Facades\Cache::flush();
+
+        $user = new UserEloquentModel();
+        $user->id = \App\Domain\User\ValueObjects\UserId::generate()->getValue();
+        $user->email = 'ratelimit_reset@example.com'; // Unique email to avoid conflicts
+        $user->password = Hash::make('Password123');
+        $user->user_type = 'trainer';
+        $user->name = 'Test';
+        $user->last_name = 'Trainer';
+        $user->birth_date = '1990-01-01';
+        $user->gender = 'male';
+        $user->gym_goals = null;
+        $user->email_verified_at = now();
+        $user->save();
+
+        // Generar token válido
+        $token = \Illuminate\Support\Str::random(60);
+        DB::table('password_resets')->insert([
+            'email' => 'ratelimit_reset@example.com',
+            'token' => Hash::make($token),
+            'created_at' => now()
+        ]);
+
+        // Make 7 requests - at least one should be rate limited
+        $responses = [];
+        for ($i = 0; $i < 7; $i++) {
+            $responses[] = $this->postJson('/api/v1/auth/password/reset', [
+                'email' => 'ratelimit_reset@example.com',
+                'token' => $token,
+                'password' => 'NewPassword123',
+                'password_confirmation' => 'NewPassword123'
+            ]);
+        }
+
+        // At least the last request should be rate limited (429)
+        $this->assertEquals(429, $responses[6]->status(),
+            'The 7th request should be rate limited with HTTP 429');
+    }
 }

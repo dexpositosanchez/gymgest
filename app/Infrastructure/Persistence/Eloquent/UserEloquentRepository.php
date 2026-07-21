@@ -7,6 +7,7 @@ namespace App\Infrastructure\Persistence\Eloquent;
 use App\Domain\User\Entities\UserEntity;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\ValueObjects\Email;
+use App\Domain\User\ValueObjects\Password;
 use App\Domain\User\ValueObjects\UserId;
 use App\Infrastructure\Persistence\Mappers\UserMapper;
 
@@ -49,5 +50,29 @@ class UserEloquentRepository implements UserRepositoryInterface
     public function delete(UserId $id): void
     {
         UserEloquentModel::destroy($id->getValue());
+    }
+
+    public function updatePassword(UserId $userId, Password $newPassword): void
+    {
+        $model = UserEloquentModel::find($userId->getValue());
+
+        if ($model === null) {
+            throw new \DomainException('User not found');
+        }
+
+        $model->password = $newPassword->getHashedValue();
+        $model->save();
+    }
+
+    public function markEmailAsVerified(UserId $userId): void
+    {
+        $model = UserEloquentModel::find($userId->getValue());
+
+        if ($model === null) {
+            throw new \DomainException('User not found');
+        }
+
+        $model->email_verified_at = now();
+        $model->save();
     }
 }

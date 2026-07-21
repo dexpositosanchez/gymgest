@@ -6,23 +6,12 @@ namespace App\Application\Routine\UseCases;
 
 use App\Application\Routine\DTOs\CreateRoutineDTO;
 use App\Domain\Routine\Entities\RoutineEntity;
-use App\Domain\Routine\Entities\RoutineDayEntity;
-use App\Domain\Routine\Entities\RoutineDayExerciseEntity;
-use App\Domain\Routine\Entities\ExerciseSetEntity;
 use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
+use App\Domain\Routine\Services\RoutineReconstructionService;
 use App\Domain\Routine\ValueObjects\RoutineId;
 use App\Domain\Routine\ValueObjects\RoutineName;
 use App\Domain\Routine\ValueObjects\RoutineDescription;
 use App\Domain\Routine\ValueObjects\RoutineDifficulty;
-use App\Domain\Routine\ValueObjects\RoutineDayId;
-use App\Domain\Routine\ValueObjects\DayNumber;
-use App\Domain\Routine\ValueObjects\DayName;
-use App\Domain\Routine\ValueObjects\RoutineDayExerciseId;
-use App\Domain\Exercise\ValueObjects\ExerciseId;
-use App\Domain\Routine\ValueObjects\OrderIndex;
-use App\Domain\Routine\ValueObjects\ExerciseSetId;
-use App\Domain\Routine\ValueObjects\SetNumber;
-use App\Domain\Routine\ValueObjects\Reps;
 use App\Domain\User\ValueObjects\UserId;
 
 class CreateRoutineUseCase
@@ -30,19 +19,20 @@ class CreateRoutineUseCase
     /** @var RoutineRepositoryInterface */
     private $routineRepository;
 
-    public function __construct(RoutineRepositoryInterface $routineRepository)
-    {
+    /** @var RoutineReconstructionService */
+    private $reconstructionService;
+
+    public function __construct(
+        RoutineRepositoryInterface $routineRepository,
+        RoutineReconstructionService $reconstructionService
+    ) {
         $this->routineRepository = $routineRepository;
+        $this->reconstructionService = $reconstructionService;
     }
 
     public function execute(CreateRoutineDTO $dto, UserId $trainerId): RoutineEntity
     {
-        // Validate at least one day
-        if (empty($dto->days)) {
-            throw new \DomainException('La rutina debe tener al menos un día');
-        }
-
-        // Create routine entity
+        // Crear entidad de rutina
         $routine = new RoutineEntity(
             RoutineId::generate(),
             $trainerId,
@@ -51,55 +41,8 @@ class CreateRoutineUseCase
             RoutineDifficulty::fromString($dto->difficulty)
         );
 
-        // Create days with exercises
-        $days = [];
-        foreach ($dto->days as $dayData) {
-            // Validate at least one exercise per day
-            if (empty($dayData['exercises'])) {
-                throw new \DomainException('Cada día debe tener al menos un ejercicio');
-            }
-
-            $dayId = RoutineDayId::generate();
-
-            $exercises = [];
-            foreach ($dayData['exercises'] as $exerciseData) {
-                // Validate at least one set per exercise
-                if (empty($exerciseData['sets'])) {
-                    throw new \DomainException('Cada ejercicio debe tener al menos una serie');
-                }
-
-                $exerciseId = RoutineDayExerciseId::generate();
-
-                $sets = [];
-                foreach ($exerciseData['sets'] as $setData) {
-                    $sets[] = new ExerciseSetEntity(
-                        ExerciseSetId::generate(),
-                        $exerciseId,
-                        new SetNumber($setData['set_number']),
-                        new Reps($setData['reps']),
-                        $setData['notes'] ?? null
-                    );
-                }
-
-                $exercises[] = new RoutineDayExerciseEntity(
-                    $exerciseId,
-                    $dayId,
-                    new ExerciseId($exerciseData['exercise_id']),
-                    new OrderIndex($exerciseData['order_index']),
-                    $sets,
-                    $exerciseData['notes'] ?? null
-                );
-            }
-
-            $days[] = new RoutineDayEntity(
-                $dayId,
-                $routine->getId(),
-                new DayNumber($dayData['day_number']),
-                new DayName($dayData['name']),
-                $exercises
-            );
-        }
-
+        // Usar servicio de reconstrucción para construir estructura de días
+        $days = $this->reconstructionService->reconstructDays($dto->days, $routine->getId());
         $routine->setDays($days);
 
         $this->routineRepository->save($routine);

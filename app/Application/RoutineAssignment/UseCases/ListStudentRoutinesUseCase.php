@@ -8,18 +8,18 @@ use App\Application\RoutineAssignment\DTOs\GymInfoDTO;
 use App\Application\RoutineAssignment\DTOs\StudentRoutineItemDTO;
 use App\Application\RoutineAssignment\DTOs\StudentRoutinesResponseDTO;
 use App\Application\RoutineAssignment\DTOs\TrainerInfoDTO;
-use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
+use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface;
 use App\Domain\RoutineAssignment\Repositories\RoutineAssignmentRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
 
 final class ListStudentRoutinesUseCase
 {
     private RoutineAssignmentRepositoryInterface $repository;
-    private RoutineAssignmentCacheService $cacheService;
+    private RoutineAssignmentCacheServiceInterface $cacheService;
 
     public function __construct(
         RoutineAssignmentRepositoryInterface $repository,
-        RoutineAssignmentCacheService $cacheService
+        RoutineAssignmentCacheServiceInterface $cacheService
     ) {
         $this->repository = $repository;
         $this->cacheService = $cacheService;
@@ -29,10 +29,10 @@ final class ListStudentRoutinesUseCase
     {
         $cacheParams = array_merge($filters, ['page' => $page, 'per_page' => $perPage]);
 
-        // Try cache first
+        // Intentar obtener primero desde caché
         $cached = $this->cacheService->get($studentId, $cacheParams);
         if ($cached !== null) {
-            // Reconstruct DTOs from cached arrays
+            // Reconstruir DTOs desde arrays en caché
             $items = [];
             foreach ($cached['data'] as $itemArray) {
                 $items[] = new StudentRoutineItemDTO(
@@ -56,7 +56,7 @@ final class ListStudentRoutinesUseCase
             return new StudentRoutinesResponseDTO($items, $cached['meta']);
         }
 
-        // Query from database
+        // Consultar desde base de datos
         $result = $this->repository->findStudentRoutinesWithDetails(
             new UserId($studentId),
             $filters,
@@ -64,7 +64,7 @@ final class ListStudentRoutinesUseCase
             $perPage
         );
 
-        // Map to DTOs
+        // Mapear a DTOs
         $items = [];
         foreach ($result['data'] as $item) {
             $trainerFullName = trim($item->trainer_name . ' ' . $item->trainer_last_name);
@@ -94,7 +94,7 @@ final class ListStudentRoutinesUseCase
 
         $response = new StudentRoutinesResponseDTO($items, $result['meta']);
 
-        // Store in cache (convert DTOs to arrays for storage)
+        // Guardar en caché (convertir DTOs a arrays para almacenamiento)
         $cacheData = [];
         foreach ($items as $item) {
             $cacheData[] = $item->toArray();

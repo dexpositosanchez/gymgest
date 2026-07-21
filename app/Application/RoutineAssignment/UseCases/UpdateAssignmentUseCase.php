@@ -37,22 +37,22 @@ class UpdateAssignmentUseCase
 
     public function execute(string $assignmentId, UpdateAssignmentDTO $dto, string $trainerId): RoutineAssignmentResponseDTO
     {
-        // Guard: Find assignment
+        // Buscar asignación
         $assignment = $this->assignmentRepository->findById(new RoutineAssignmentId($assignmentId));
         if (!$assignment) {
             throw new InvalidArgumentException('Assignment not found');
         }
 
-        // Guard: Verify trainer owns gym
+        // Verificar que el entrenador es dueño del gimnasio
         $gym = $this->gymRepository->findById($assignment->getGymId());
         if (!$gym) {
             throw new InvalidArgumentException('Gym not found');
         }
-        if ($gym->getTrainerId()->getValue() !== $trainerId) {
+        if (!$gym->belongsToTrainer(new UserId($trainerId))) {
             throw new InvalidArgumentException('Unauthorized');
         }
 
-        // Update fields
+        // Actualizar campos
         if ($dto->startsAt !== null) {
             $assignment->updateStartsAt(StartsAt::fromString($dto->startsAt));
         }
@@ -60,10 +60,10 @@ class UpdateAssignmentUseCase
             $assignment->updateNotes($dto->notes);
         }
 
-        // Save changes
+        // Guardar cambios
         $this->assignmentRepository->save($assignment);
 
-        // If isCurrent=true, call domain service
+        // Si isCurrent=true, llamar al servicio de dominio
         if ($dto->isCurrent === true) {
             $this->domainService->setCurrentRoutine(
                 $assignment->getStudentId(),

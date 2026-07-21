@@ -20,16 +20,16 @@ final class RoutineAssignmentDomainService
 
     public function setCurrentRoutine(UserId $studentId, GymId $gymId, RoutineAssignmentId $assignmentId): void
     {
-        // Fetch all assignments for this student+gym
+        // Obtener todas las asignaciones para este estudiante+gym
         $assignments = $this->repository->findByStudentAndGym($studentId, $gymId);
 
-        // Set isCurrent=false on all
+        // Establecer isCurrent=false en todas
         foreach ($assignments as $assignment) {
             $assignment->unsetAsCurrent();
             $this->repository->save($assignment);
         }
 
-        // Set isCurrent=true on the specified one
+        // Establecer isCurrent=true en la especificada
         $targetAssignment = $this->repository->findById($assignmentId);
         if ($targetAssignment !== null) {
             $targetAssignment->setAsCurrent();

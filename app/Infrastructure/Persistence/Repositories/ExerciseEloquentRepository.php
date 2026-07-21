@@ -86,4 +86,15 @@ class ExerciseEloquentRepository implements ExerciseRepositoryInterface
     {
         ExerciseEloquentModel::destroy($id->getValue());
     }
+
+    public function getMuscleGroupName(ExerciseId $exerciseId): ?string
+    {
+        $exerciseModel = ExerciseEloquentModel::with('muscleGroup')->find($exerciseId->getValue());
+
+        if (!$exerciseModel || !$exerciseModel->muscleGroup) {
+            return null;
+        }
+
+        return $exerciseModel->muscleGroup->name;
+    }
 }

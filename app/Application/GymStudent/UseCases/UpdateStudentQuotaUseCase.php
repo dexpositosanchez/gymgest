@@ -41,7 +41,7 @@ class UpdateStudentQuotaUseCase
             throw new InvalidArgumentException('Gym not found');
         }
 
-        if ($gym->getTrainerId()->getValue() !== $trainerId) {
+        if (!$gym->belongsToTrainer(new UserId($trainerId))) {
             throw new InvalidArgumentException('Unauthorized');
         }
 

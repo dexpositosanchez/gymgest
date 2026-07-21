@@ -9,6 +9,8 @@ use App\Application\Statistics\UseCases\GetExerciseWeightHistoryUseCase;
 use App\Application\Statistics\UseCases\GetGymActiveStudentsUseCase;
 use App\Application\Statistics\UseCases\GetGymActiveStudentsCountUseCase;
 use App\Application\Statistics\UseCases\GetStudentExecutedExercisesUseCase;
+use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
+use App\Domain\User\ValueObjects\UserId;
 use App\Infrastructure\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,19 +23,22 @@ class StatisticsController extends Controller
     private GetGymActiveStudentsUseCase $getGymActiveStudentsUseCase;
     private GetGymActiveStudentsCountUseCase $getGymActiveStudentsCountUseCase;
     private GetStudentExecutedExercisesUseCase $getStudentExecutedExercisesUseCase;
+    private GymStudentRepositoryInterface $gymStudentRepository;
 
     public function __construct(
         GetStudentRoutineStatsUseCase $getStudentRoutineStatsUseCase,
         GetExerciseWeightHistoryUseCase $getExerciseWeightHistoryUseCase,
         GetGymActiveStudentsUseCase $getGymActiveStudentsUseCase,
         GetGymActiveStudentsCountUseCase $getGymActiveStudentsCountUseCase,
-        GetStudentExecutedExercisesUseCase $getStudentExecutedExercisesUseCase
+        GetStudentExecutedExercisesUseCase $getStudentExecutedExercisesUseCase,
+        GymStudentRepositoryInterface $gymStudentRepository
     ) {
         $this->getStudentRoutineStatsUseCase = $getStudentRoutineStatsUseCase;
         $this->getExerciseWeightHistoryUseCase = $getExerciseWeightHistoryUseCase;
         $this->getGymActiveStudentsUseCase = $getGymActiveStudentsUseCase;
         $this->getGymActiveStudentsCountUseCase = $getGymActiveStudentsCountUseCase;
         $this->getStudentExecutedExercisesUseCase = $getStudentExecutedExercisesUseCase;
+        $this->gymStudentRepository = $gymStudentRepository;
     }
 
     /**
@@ -45,11 +50,10 @@ class StatisticsController extends Controller
             $trainerId = auth()->user()->id;
 
             // Verify student belongs to trainer's gym
-            $studentBelongsToTrainer = \DB::table('gym_students as gs')
-                ->join('gyms as g', 'gs.gym_id', '=', 'g.id')
-                ->where('gs.student_id', $studentId)
-                ->where('g.trainer_id', $trainerId)
-                ->exists();
+            $studentBelongsToTrainer = $this->gymStudentRepository->studentBelongsToTrainer(
+                new UserId($studentId),
+                new UserId($trainerId)
+            );
 
             if (!$studentBelongsToTrainer) {
                 return response()->json(['error' => 'Unauthorized'], 403);
@@ -85,11 +89,10 @@ class StatisticsController extends Controller
             $trainerId = auth()->user()->id;
 
             // Verify student belongs to trainer's gym
-            $studentBelongsToTrainer = \DB::table('gym_students as gs')
-                ->join('gyms as g', 'gs.gym_id', '=', 'g.id')
-                ->where('gs.student_id', $studentId)
-                ->where('g.trainer_id', $trainerId)
-                ->exists();
+            $studentBelongsToTrainer = $this->gymStudentRepository->studentBelongsToTrainer(
+                new UserId($studentId),
+                new UserId($trainerId)
+            );
 
             if (!$studentBelongsToTrainer) {
                 return response()->json(['error' => 'Unauthorized'], 403);
@@ -184,11 +187,10 @@ class StatisticsController extends Controller
             $trainerId = auth()->user()->id;
 
             // Verify student belongs to trainer's gym
-            $studentBelongsToTrainer = \DB::table('gym_students as gs')
-                ->join('gyms as g', 'gs.gym_id', '=', 'g.id')
-                ->where('gs.student_id', $studentId)
-                ->where('g.trainer_id', $trainerId)
-                ->exists();
+            $studentBelongsToTrainer = $this->gymStudentRepository->studentBelongsToTrainer(
+                new UserId($studentId),
+                new UserId($trainerId)
+            );
 
             if (!$studentBelongsToTrainer) {
                 return response()->json(['error' => 'Unauthorized'], 403);

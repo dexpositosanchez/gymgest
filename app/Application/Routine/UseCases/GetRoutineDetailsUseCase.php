@@ -8,15 +8,22 @@ use App\Application\Routine\DTOs\RoutineResponseDTO;
 use App\Domain\Routine\Repositories\RoutineRepositoryInterface;
 use App\Domain\Routine\ValueObjects\RoutineId;
 use App\Domain\User\ValueObjects\UserId;
+use App\Domain\Exercise\Repositories\ExerciseRepositoryInterface;
 
 class GetRoutineDetailsUseCase
 {
     /** @var RoutineRepositoryInterface */
     private $routineRepository;
 
-    public function __construct(RoutineRepositoryInterface $routineRepository)
-    {
+    /** @var ExerciseRepositoryInterface */
+    private $exerciseRepository;
+
+    public function __construct(
+        RoutineRepositoryInterface $routineRepository,
+        ExerciseRepositoryInterface $exerciseRepository
+    ) {
         $this->routineRepository = $routineRepository;
+        $this->exerciseRepository = $exerciseRepository;
     }
 
     public function execute(RoutineId $routineId, UserId $trainerId): ?RoutineResponseDTO
@@ -27,12 +34,12 @@ class GetRoutineDetailsUseCase
             return null;
         }
 
-        // Verify routine belongs to trainer
+        // Verificar que la rutina pertenece al entrenador
         if (!$routine->belongsToTrainer($trainerId)) {
             throw new \DomainException('No tienes permiso para ver esta rutina');
         }
 
-        // Build days array for response
+        // Construir array de días para la respuesta
         $daysArray = [];
         foreach ($routine->getDays() as $day) {
             $exercisesArray = [];
@@ -57,10 +64,10 @@ class GetRoutineDetailsUseCase
                     'notes' => $exercise->getNotes(),
                 ];
 
-                // Collect muscle group name (will be loaded via eager loading)
-                $exerciseModel = \App\Infrastructure\Persistence\Eloquent\ExerciseEloquentModel::with('muscleGroup')->find($exercise->getExerciseId()->getValue());
-                if ($exerciseModel && $exerciseModel->muscleGroup) {
-                    $muscleGroupsSet[$exerciseModel->muscleGroup->name] = true;
+                // Recopilar nombre del grupo muscular mediante repositorio
+                $muscleGroupName = $this->exerciseRepository->getMuscleGroupName($exercise->getExerciseId());
+                if ($muscleGroupName) {
+                    $muscleGroupsSet[$muscleGroupName] = true;
                 }
             }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Application\GymStudent;
 
 use App\Application\GymStudent\UseCases\ListStudentGymsUseCase;
-use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
+use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class ListStudentGymsUseCaseTest extends TestCase
 {
     private GymStudentRepositoryInterface $repository;
-    private RoutineAssignmentCacheService $cacheService;
+    private RoutineAssignmentCacheServiceInterface $cacheService;
     private ListStudentGymsUseCase $useCase;
 
     protected function setUp(): void
@@ -21,7 +21,7 @@ class ListStudentGymsUseCaseTest extends TestCase
         parent::setUp();
 
         $this->repository = $this->createMock(GymStudentRepositoryInterface::class);
-        $this->cacheService = $this->createMock(RoutineAssignmentCacheService::class);
+        $this->cacheService = $this->createMock(RoutineAssignmentCacheServiceInterface::class);
         $this->useCase = new ListStudentGymsUseCase(
             $this->repository,
             $this->cacheService

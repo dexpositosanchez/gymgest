@@ -6,7 +6,7 @@ namespace App\Application\RoutineAssignment\UseCases;
 
 use App\Application\RoutineAssignment\DTOs\AssignRoutineDTO;
 use App\Application\RoutineAssignment\DTOs\RoutineAssignmentResponseDTO;
-use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
+use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface;
 use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\Gym\ValueObjects\GymId;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
@@ -30,7 +30,7 @@ class AssignRoutineUseCase
     private GymRepositoryInterface $gymRepository;
     private RoutineAssignmentDomainService $domainService;
     private RoutineAssignmentResponseBuilderInterface $responseBuilder;
-    private RoutineAssignmentCacheService $cacheService;
+    private RoutineAssignmentCacheServiceInterface $cacheService;
 
     public function __construct(
         RoutineAssignmentRepositoryInterface $assignmentRepository,
@@ -39,7 +39,7 @@ class AssignRoutineUseCase
         GymRepositoryInterface $gymRepository,
         RoutineAssignmentDomainService $domainService,
         RoutineAssignmentResponseBuilderInterface $responseBuilder,
-        RoutineAssignmentCacheService $cacheService
+        RoutineAssignmentCacheServiceInterface $cacheService
     ) {
         $this->assignmentRepository = $assignmentRepository;
         $this->routineRepository = $routineRepository;
@@ -52,24 +52,24 @@ class AssignRoutineUseCase
 
     public function execute(AssignRoutineDTO $dto): RoutineAssignmentResponseDTO
     {
-        // Guard: Verify gym exists
+        // Verificar que el gimnasio existe
         $gym = $this->gymRepository->findById(new GymId($dto->gymId));
         if (!$gym) {
             throw new InvalidArgumentException('Gym not found');
         }
 
-        // Guard: Verify routine exists
+        // Verificar que la rutina existe
         $routine = $this->routineRepository->findById(new RoutineId($dto->routineId));
         if (!$routine) {
             throw new InvalidArgumentException('Routine not found');
         }
 
-        // Guard: Verify routine belongs to same trainer as gym
-        if (!$routine->getTrainerId()->equals($gym->getTrainerId())) {
+        // Verificar que la rutina pertenece al mismo entrenador que el gimnasio
+        if (!$routine->belongsToTrainer($gym->getTrainerId())) {
             throw new InvalidArgumentException('Routine does not belong to gym trainer');
         }
 
-        // Guard: Verify student exists and is active in this gym
+        // Verificar que el estudiante existe y está activo en este gimnasio
         $gymStudent = $this->gymStudentRepository->findByGymAndStudent(
             new GymId($dto->gymId),
             new UserId($dto->studentId)
@@ -81,7 +81,7 @@ class AssignRoutineUseCase
             throw new InvalidArgumentException('Student is not active in this gym');
         }
 
-        // Create assignment
+        // Crear asignación
         $assignment = new RoutineAssignmentEntity(
             RoutineAssignmentId::generate(),
             new RoutineId($dto->routineId),
@@ -93,7 +93,7 @@ class AssignRoutineUseCase
             $dto->notes
         );
 
-        // Save assignment (may throw exception if duplicate due to unique constraint)
+        // Guardar asignación (puede lanzar excepción si existe duplicado por restricción única)
         try {
             $this->assignmentRepository->save($assignment);
         } catch (\Exception $e) {
@@ -104,7 +104,7 @@ class AssignRoutineUseCase
             throw $e;
         }
 
-        // If isCurrent=true, call domain service to set it as current
+        // Si isCurrent=true, llamar al servicio de dominio para establecerla como actual
         if ($dto->isCurrent) {
             $this->domainService->setCurrentRoutine(
                 new UserId($dto->studentId),
@@ -113,7 +113,7 @@ class AssignRoutineUseCase
             );
         }
 
-        // Invalidate student cache
+        // Invalidar caché del estudiante
         $this->cacheService->invalidate($dto->studentId);
 
         return $this->responseBuilder->buildFromEntity($assignment);

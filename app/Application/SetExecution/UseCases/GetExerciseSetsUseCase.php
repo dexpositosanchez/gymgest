@@ -51,7 +51,7 @@ class GetExerciseSetsUseCase
         $exerciseIdVO = new ExerciseId($exerciseId);
         $studentIdVO = new UserId($studentId);
 
-        // Find RoutineDayExercise
+        // Buscar RoutineDayExercise
         $routineDayExercise = $this->routineDayExerciseRepository->findBySessionAndExercise(
             $sessionIdVO,
             $exerciseIdVO
@@ -61,12 +61,12 @@ class GetExerciseSetsUseCase
             throw new \DomainException('Este ejercicio no pertenece a la sesión actual');
         }
 
-        // Get all sets configured for this exercise
+        // Obtener todas las series configuradas para este ejercicio
         $exerciseSets = $this->exerciseSetRepository->findByRoutineDayExerciseId(
             $routineDayExercise->getId()
         );
 
-        // Get completed sets
+        // Obtener series completadas
         $completedSets = $this->setExecutionRepository->findBySessionAndExercise($sessionIdVO, $exerciseIdVO);
         $completedSetNumbers = array_map(
             fn($set) => $set->getSetNumber()->getValue(),
@@ -78,7 +78,7 @@ class GetExerciseSetsUseCase
             $setNumber = $exerciseSet->getSetNumber()->getValue();
             $reps = $exerciseSet->getReps()->getValue();
 
-            // Get suggested weight specific to this set's reps count
+            // Obtener peso sugerido específico para el número de repeticiones de esta serie
             $repsVO = new Reps($reps);
             $suggestedWeight = $this->historyRepository->findSuggestedWeight($studentIdVO, $exerciseIdVO, $repsVO);
 

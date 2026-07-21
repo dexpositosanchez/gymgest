@@ -6,8 +6,6 @@ namespace App\Application\UseCases;
 
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
-use App\Infrastructure\Persistence\Mappers\UserMapper;
-use App\Infrastructure\Persistence\Eloquent\UserEloquentModel;
 
 class VerifyEmailUseCase
 {
@@ -21,7 +19,8 @@ class VerifyEmailUseCase
 
     public function execute(string $userId, string $hash): void
     {
-        $user = $this->userRepository->findById(new UserId($userId));
+        $userIdVO = new UserId($userId);
+        $user = $this->userRepository->findById($userIdVO);
 
         if (!$user) {
             throw new \DomainException('Usuario no encontrado');
@@ -37,12 +36,7 @@ class VerifyEmailUseCase
             return;
         }
 
-        // Marcar como verificado
-        $user->markEmailAsVerified();
-
-        // Persistir
-        $eloquentModel = UserEloquentModel::find($userId);
-        UserMapper::updateEloquentFromDomain($eloquentModel, $user);
-        $eloquentModel->save();
+        // Mark email as verified using repository
+        $this->userRepository->markEmailAsVerified($userIdVO);
     }
 }

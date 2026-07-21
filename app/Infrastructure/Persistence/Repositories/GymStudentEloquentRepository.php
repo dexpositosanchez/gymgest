@@ -109,4 +109,13 @@ class GymStudentEloquentRepository implements GymStudentRepositoryInterface
             ->get()
             ->toArray();
     }
+
+    public function studentBelongsToTrainer(UserId $studentId, UserId $trainerId): bool
+    {
+        return DB::table('gym_students as gs')
+            ->join('gyms as g', 'gs.gym_id', '=', 'g.id')
+            ->where('gs.student_id', $studentId->getValue())
+            ->where('g.trainer_id', $trainerId->getValue())
+            ->exists();
+    }
 }

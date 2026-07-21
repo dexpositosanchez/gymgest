@@ -23,4 +23,13 @@ interface ExerciseRepositoryInterface
     public function save(ExerciseEntity $exercise): void;
 
     public function delete(ExerciseId $id): void;
+
+    /**
+     * Get muscle group name for an exercise
+     * Returns null if exercise doesn't exist or has no muscle group
+     *
+     * @param ExerciseId $exerciseId
+     * @return string|null
+     */
+    public function getMuscleGroupName(ExerciseId $exerciseId): ?string;
 }

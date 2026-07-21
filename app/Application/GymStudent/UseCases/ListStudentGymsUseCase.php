@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Application\GymStudent\UseCases;
 
 use App\Application\GymStudent\DTOs\StudentGymItemDTO;
-use App\Application\RoutineAssignment\Services\RoutineAssignmentCacheService;
+use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\User\ValueObjects\UserId;
 
 final class ListStudentGymsUseCase
 {
     private GymStudentRepositoryInterface $repository;
-    private RoutineAssignmentCacheService $cacheService;
+    private RoutineAssignmentCacheServiceInterface $cacheService;
 
     public function __construct(
         GymStudentRepositoryInterface $repository,
-        RoutineAssignmentCacheService $cacheService
+        RoutineAssignmentCacheServiceInterface $cacheService
     ) {
         $this->repository = $repository;
         $this->cacheService = $cacheService;
@@ -24,17 +24,17 @@ final class ListStudentGymsUseCase
 
     public function execute(string $studentId): array
     {
-        // Try cache first
+        // Intentar obtener primero desde caché
         $cached = $this->cacheService->get($studentId, ['type' => 'gyms']);
 
         if ($cached !== null) {
             return $cached;
         }
 
-        // Query from database
+        // Consultar desde base de datos
         $gyms = $this->repository->findActiveGymsByStudent(new UserId($studentId));
 
-        // Map to DTOs
+        // Mapear a DTOs
         $items = [];
         foreach ($gyms as $gym) {
             $quotaStatus = $this->calculateQuotaStatus($gym->quota_expires_at);
@@ -61,10 +61,10 @@ final class ListStudentGymsUseCase
             );
         }
 
-        // Convert to array for cache
+        // Convertir a array para caché
         $result = array_map(fn($item) => $item->toArray(), $items);
 
-        // Store in cache
+        // Guardar en caché
         $this->cacheService->set($studentId, ['type' => 'gyms'], $result);
 
         return $result;

@@ -26,11 +26,11 @@ class UpdateCurrentRoutinesUseCase
         $today = (new DateTimeImmutable())->format('Y-m-d');
         $updatedCount = 0;
 
-        // Fetch all assignments where startsAt <= today AND isCurrent=false
+        // Obtener todas las asignaciones donde startsAt <= hoy Y isCurrent=false
         $pendingAssignments = $this->assignmentRepository->findPendingByStartsAt($today);
 
         foreach ($pendingAssignments as $assignment) {
-            // Check if there's already a current assignment for same student+gym with startsAt > today
+            // Verificar si ya existe una asignación actual para el mismo estudiante+gym con startsAt > hoy
             $futureCurrentExists = $this->assignmentRepository->hasFutureCurrentAssignment(
                 $assignment->getStudentId(),
                 $assignment->getGymId(),
@@ -38,11 +38,11 @@ class UpdateCurrentRoutinesUseCase
             );
 
             if ($futureCurrentExists) {
-                // Skip this one
+                // Omitir esta asignación
                 continue;
             }
 
-            // Set this assignment as current
+            // Establecer esta asignación como actual
             $this->domainService->setCurrentRoutine(
                 $assignment->getStudentId(),
                 $assignment->getGymId(),

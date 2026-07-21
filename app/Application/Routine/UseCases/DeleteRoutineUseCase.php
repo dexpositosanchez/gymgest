@@ -39,12 +39,12 @@ class DeleteRoutineUseCase
             throw new \DomainException('Rutina no encontrada');
         }
 
-        // Verify routine belongs to trainer
+        // Verificar que la rutina pertenece al entrenador
         if (!$routine->belongsToTrainer($trainerId)) {
             throw new \DomainException('No tienes permiso para eliminar esta rutina');
         }
 
-        // Check if routine is assigned
+        // Verificar si la rutina está asignada
         if ($this->routineDomainService->isAssigned($routine->getId(), $this->assignmentRepository)) {
             throw new \DomainException('No se puede eliminar esta rutina porque está asignada a un alumno');
         }

@@ -22,17 +22,17 @@ class FinishWorkoutSessionUseCase
     {
         $session = $this->sessionRepository->findById(new WorkoutSessionId($sessionId));
 
-        // Guard: Session must exist
+        // Verificar: la sesión debe existir
         if ($session === null) {
             throw new \DomainException('Sesión no encontrada');
         }
 
-        // Guard: Session must belong to student
+        // Verificar: la sesión debe pertenecer al estudiante
         if (!$session->getStudentId()->equals(new UserId($studentId))) {
             throw new \DomainException('Esta sesión no te pertenece');
         }
 
-        // Guard: Session must be active
+        // Verificar: la sesión debe estar activa
         if ($session->isFinished()) {
             throw new \DomainException('La sesión ya está finalizada');
         }

@@ -2890,23 +2890,21 @@
                                             "items": {
                                                 "properties": {
                                                     "set_number": {
+                                                        "description": "Set number (1, 2, 3, etc.)",
                                                         "type": "integer"
                                                     },
-                                                    "min_reps": {
-                                                        "type": "integer"
-                                                    },
-                                                    "max_reps": {
-                                                        "type": "integer"
-                                                    },
-                                                    "rest_seconds": {
+                                                    "reps": {
+                                                        "description": "Configured number of reps for this set",
                                                         "type": "integer"
                                                     },
                                                     "suggested_weight": {
+                                                        "description": "Suggested weight based on history (null if no history)",
                                                         "type": "number",
                                                         "format": "float",
                                                         "nullable": true
                                                     },
                                                     "is_completed": {
+                                                        "description": "Whether this set has been executed",
                                                         "type": "boolean"
                                                     }
                                                 },
@@ -2925,6 +2923,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "description": "Exercise does not belong to session"
+                    },
                     "403": {
                         "description": "Only students can access this endpoint"
                     }
@@ -2940,6 +2941,7 @@
                     "Student Workout Sessions"
                 ],
                 "summary": "Execute a set",
+                "description": "Execute a set in a workout session. Validates that set_number exists in routine configuration and that reps_completed matches configured reps. Updates weight history only when weight changes.",
                 "operationId": "3cdf92b687cbbcc8a95a1d3913e33ed7",
                 "parameters": [
                     {
@@ -2972,15 +2974,18 @@
                                 ],
                                 "properties": {
                                     "set_number": {
+                                        "description": "Must be a valid set number from routine configuration",
                                         "type": "integer",
                                         "minimum": 1
                                     },
                                     "reps_completed": {
+                                        "description": "Must exactly match the configured reps for this set",
                                         "type": "integer",
                                         "maximum": 999,
                                         "minimum": 1
                                     },
                                     "weight_used": {
+                                        "description": "Weight used in kg (optional for bodyweight exercises)",
                                         "type": "number",
                                         "format": "float",
                                         "maximum": 999.99,
@@ -2995,10 +3000,36 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Set executed successfully"
+                        "description": "Set executed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Serie ejecutada exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error or session finished"
+                        "description": "Validation error. Possible errors: (1) Set number doesn't exist in routine, (2) Reps completed don't match configured reps, (3) Set already executed, (4) Session already finished",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "El número de serie no existe en la configuración del ejercicio"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Only students can access this endpoint"

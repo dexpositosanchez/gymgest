@@ -13,8 +13,10 @@ use App\Domain\Gym\Repositories\GymRepositoryInterface;
 use App\Domain\GymStudent\Repositories\GymStudentRepositoryInterface;
 use App\Domain\RoutineAssignment\Repositories\RoutineAssignmentRepositoryInterface;
 use App\Domain\WorkoutSession\Repositories\WorkoutSessionRepositoryInterface;
+use App\Domain\WorkoutSession\Repositories\WorkoutSessionExerciseStatusRepositoryInterface;
 use App\Domain\SetExecution\Repositories\SetExecutionRepositoryInterface;
 use App\Domain\ExerciseWeightHistory\Repositories\ExerciseWeightHistoryRepositoryInterface;
+use App\Domain\Statistics\Repositories\StatisticsRepositoryInterface;
 use App\Infrastructure\Persistence\Eloquent\UserEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\ExerciseEloquentRepository;
 use App\Application\RoutineAssignment\Services\RoutineAssignmentResponseBuilderInterface;
@@ -26,12 +28,24 @@ use App\Infrastructure\Persistence\Repositories\GymEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\GymStudentEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\RoutineAssignmentEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\WorkoutSessionEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\WorkoutSessionExerciseStatusEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\SetExecutionEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\ExerciseWeightHistoryEloquentRepository;
+use App\Infrastructure\Persistence\Repositories\StatisticsEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\RoutineDayExerciseEloquentRepository;
 use App\Infrastructure\Persistence\Repositories\ExerciseSetEloquentRepository;
 use App\Infrastructure\Persistence\Eloquent\GymStudentEloquentModel;
 use App\Infrastructure\Persistence\Observers\GymStudentObserver;
+use App\Domain\Auth\Services\TokenServiceInterface;
+use App\Domain\Auth\Services\PasswordResetServiceInterface;
+use App\Domain\Mail\Services\EmailServiceInterface;
+use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface;
+use App\Domain\ExerciseWeightHistory\Services\WeightHistoryCacheServiceInterface;
+use App\Infrastructure\Auth\JWTTokenService;
+use App\Infrastructure\Auth\LaravelPasswordResetService;
+use App\Infrastructure\Mail\LaravelEmailService;
+use App\Infrastructure\Cache\RoutineAssignmentCacheService;
+use App\Infrastructure\Cache\WeightHistoryCacheService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -105,6 +119,11 @@ class AppServiceProvider extends ServiceProvider
             WorkoutSessionEloquentRepository::class
         );
 
+        $this->app->bind(
+            WorkoutSessionExerciseStatusRepositoryInterface::class,
+            WorkoutSessionExerciseStatusEloquentRepository::class
+        );
+
         // SetExecution repositories
         $this->app->bind(
             SetExecutionRepositoryInterface::class,
@@ -117,10 +136,44 @@ class AppServiceProvider extends ServiceProvider
             ExerciseWeightHistoryEloquentRepository::class
         );
 
+        // Statistics repositories
+        $this->app->bind(
+            StatisticsRepositoryInterface::class,
+            StatisticsEloquentRepository::class
+        );
+
         // Infrastructure services
         $this->app->singleton(
             RoutineAssignmentResponseBuilderInterface::class,
             RoutineAssignmentResponseBuilder::class
+        );
+
+        // Auth services
+        $this->app->bind(
+            TokenServiceInterface::class,
+            JWTTokenService::class
+        );
+
+        $this->app->bind(
+            PasswordResetServiceInterface::class,
+            LaravelPasswordResetService::class
+        );
+
+        // Mail services
+        $this->app->bind(
+            EmailServiceInterface::class,
+            LaravelEmailService::class
+        );
+
+        // Cache services
+        $this->app->bind(
+            RoutineAssignmentCacheServiceInterface::class,
+            RoutineAssignmentCacheService::class
+        );
+
+        $this->app->bind(
+            WeightHistoryCacheServiceInterface::class,
+            WeightHistoryCacheService::class
         );
     }
 

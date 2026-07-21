@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace App\Application\UseCases;
 
 use App\Application\DTOs\LoginUserDTO;
+use App\Domain\Auth\Services\TokenServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\ValueObjects\Email;
-use App\Infrastructure\Persistence\Eloquent\UserEloquentModel;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginUserUseCase
 {
     /** @var UserRepositoryInterface */
     private $userRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository)
-    {
+    /** @var TokenServiceInterface */
+    private $tokenService;
+
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        TokenServiceInterface $tokenService
+    ) {
         $this->userRepository = $userRepository;
+        $this->tokenService = $tokenService;
     }
 
     public function execute(LoginUserDTO $dto): array
@@ -34,8 +39,7 @@ class LoginUserUseCase
             throw new \DomainException('Debes verificar tu email antes de iniciar sesión');
         }
 
-        $eloquentModel = UserEloquentModel::find($user->getId()->getValue());
-        $token = JWTAuth::fromUser($eloquentModel);
+        $token = $this->tokenService->generateTokenForUser($user->getId());
 
         return [
             'access_token' => $token,

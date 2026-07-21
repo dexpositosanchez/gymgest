@@ -45,6 +45,13 @@ class SetExecutionEloquentRepository implements SetExecutionRepositoryInterface
             ->count();
     }
 
+    public function countBySessionAndExercise(WorkoutSessionId $sessionId, ExerciseId $exerciseId): int
+    {
+        return SetExecutionEloquentModel::where('workout_session_id', $sessionId->getValue())
+            ->where('exercise_id', $exerciseId->getValue())
+            ->count();
+    }
+
     public function existsSetExecution(WorkoutSessionId $sessionId, ExerciseId $exerciseId, int $setNumber): bool
     {
         return SetExecutionEloquentModel::where('workout_session_id', $sessionId->getValue())

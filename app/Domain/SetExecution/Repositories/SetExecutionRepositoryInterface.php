@@ -28,6 +28,15 @@ interface SetExecutionRepositoryInterface
     public function countCompletedSets(WorkoutSessionId $sessionId, ExerciseId $exerciseId): int;
 
     /**
+     * Count total set executions for a session and exercise
+     *
+     * @param WorkoutSessionId $sessionId
+     * @param ExerciseId $exerciseId
+     * @return int
+     */
+    public function countBySessionAndExercise(WorkoutSessionId $sessionId, ExerciseId $exerciseId): int;
+
+    /**
      * Check if a specific set execution already exists
      *
      * @param WorkoutSessionId $sessionId

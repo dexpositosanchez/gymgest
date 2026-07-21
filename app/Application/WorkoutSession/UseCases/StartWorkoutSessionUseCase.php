@@ -48,23 +48,23 @@ class StartWorkoutSessionUseCase
     ): WorkoutSessionEntity {
         $studentIdVO = new UserId($studentId);
 
-        // Guard: Cannot start if already has active session
+        // Verificar: no se puede iniciar si ya tiene una sesión activa
         if (!$this->domainService->canStartNewSession($studentIdVO)) {
             throw new \DomainException('Ya tienes una sesión activa');
         }
 
-        // Guard: Routine assignment must exist
+        // Verificar: la asignación de rutina debe existir
         $assignment = $this->assignmentRepository->findById(new RoutineAssignmentId($routineAssignmentId));
         if ($assignment === null) {
             throw new \DomainException('Rutina no asignada');
         }
 
-        // Guard: Assignment must belong to student
+        // Verificar: la asignación debe pertenecer al estudiante
         if (!$assignment->getStudentId()->equals($studentIdVO)) {
             throw new \DomainException('Esta rutina no está asignada a ti');
         }
 
-        // Guard: Day number must exist in routine
+        // Verificar: el número de día debe existir en la rutina
         $routine = $this->routineRepository->findById($assignment->getRoutineId());
         if ($routine === null) {
             throw new \DomainException('Rutina no encontrada');
@@ -74,7 +74,7 @@ class StartWorkoutSessionUseCase
             throw new \DomainException("El día {$dayNumber} no existe en esta rutina");
         }
 
-        // Create workout session
+        // Crear sesión de entrenamiento
         $session = new WorkoutSessionEntity(
             WorkoutSessionId::generate(),
             new RoutineAssignmentId($routineAssignmentId),

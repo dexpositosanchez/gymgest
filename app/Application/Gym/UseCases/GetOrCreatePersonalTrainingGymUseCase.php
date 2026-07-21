@@ -28,16 +28,16 @@ final class GetOrCreatePersonalTrainingGymUseCase
     }
 
     /**
-     * Get or create personal training gym (for internal use from EnrollStudentUseCase)
+     * Obtener o crear gimnasio de entrenamiento personal (para uso interno desde EnrollStudentUseCase)
      */
     public function execute(string $trainerId): GymResponseDTO
     {
         $trainerIdVO = new UserId($trainerId);
 
-        // Try to find existing personal training gym for this trainer
+        // Intentar encontrar gimnasio de entrenamiento personal existente para este entrenador
         $gym = $this->gymRepository->findPersonalTrainingGymByTrainer($trainerIdVO);
 
-        // If doesn't exist, create it
+        // Si no existe, crearlo
         if ($gym === null) {
             $gym = $this->gymDomainService->createPersonalTrainingGym(
                 GymId::generate(),
