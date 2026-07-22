@@ -27,7 +27,7 @@ class StudentRoutineController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/students/me/routines",
+     *     path="/students/me/routines",
      *     summary="List all assigned routines for authenticated student",
      *     tags={"Student Routines"},
      *     security={{"bearerAuth":{}}},
@@ -104,7 +104,7 @@ class StudentRoutineController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/students/me/routines/current",
+     *     path="/students/me/routines/current",
      *     summary="List only current routines for authenticated student",
      *     tags={"Student Routines"},
      *     security={{"bearerAuth":{}}},

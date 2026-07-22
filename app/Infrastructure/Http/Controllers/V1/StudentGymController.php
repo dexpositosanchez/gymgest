@@ -25,7 +25,7 @@ class StudentGymController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/students/me/gyms",
+     *     path="/students/me/gyms",
      *     summary="List all gyms where student is actively enrolled",
      *     tags={"Student Gyms"},
      *     security={{"bearerAuth":{}}},

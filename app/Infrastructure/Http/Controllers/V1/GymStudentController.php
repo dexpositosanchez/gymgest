@@ -51,7 +51,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/gyms/{gymId}/students",
+     *     path="/gyms/{gymId}/students",
      *     summary="Listar alumnos de un gimnasio",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -87,7 +87,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/gyms/{gymId}/students",
+     *     path="/gyms/{gymId}/students",
      *     summary="Matricular alumno en un gimnasio",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -144,7 +144,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/personal-training/students",
+     *     path="/personal-training/students",
      *     summary="Matricular alumno en entrenamiento personal",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -193,7 +193,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}",
+     *     path="/gyms/{gymId}/students/{studentId}",
      *     summary="Modificar cuota de un alumno",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -248,7 +248,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}",
+     *     path="/gyms/{gymId}/students/{studentId}",
      *     summary="Dar de baja a un alumno (baja lógica)",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -290,7 +290,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/deactivate",
+     *     path="/gyms/{gymId}/students/{studentId}/deactivate",
      *     summary="Dar de baja a un alumno activo",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -332,7 +332,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/reactivate",
+     *     path="/gyms/{gymId}/students/{studentId}/reactivate",
      *     summary="Dar de alta a un alumno inactivo",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},
@@ -387,7 +387,7 @@ class GymStudentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/students",
+     *     path="/students",
      *     summary="Listar todos los alumnos de todos los gimnasios del entrenador",
      *     tags={"Gym Students"},
      *     security={{"bearerAuth":{}}},

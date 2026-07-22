@@ -47,7 +47,7 @@ class RoutineAssignmentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/routines",
+     *     path="/gyms/{gymId}/students/{studentId}/routines",
      *     summary="Listar rutinas asignadas a un alumno en un gimnasio",
      *     tags={"Routine Assignments"},
      *     security={{"bearerAuth":{}}},
@@ -81,7 +81,7 @@ class RoutineAssignmentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/routines",
+     *     path="/gyms/{gymId}/students/{studentId}/routines",
      *     summary="Asignar rutina a un alumno",
      *     tags={"Routine Assignments"},
      *     security={{"bearerAuth":{}}},
@@ -146,7 +146,7 @@ class RoutineAssignmentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}",
+     *     path="/gyms/{gymId}/students/{studentId}/routines/{assignmentId}",
      *     summary="Actualizar asignación de rutina",
      *     tags={"Routine Assignments"},
      *     security={{"bearerAuth":{}}},
@@ -213,7 +213,7 @@ class RoutineAssignmentController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}",
+     *     path="/gyms/{gymId}/students/{studentId}/routines/{assignmentId}",
      *     summary="Eliminar asignación de rutina",
      *     tags={"Routine Assignments"},
      *     security={{"bearerAuth":{}}},
@@ -265,7 +265,7 @@ class RoutineAssignmentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current",
+     *     path="/gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current",
      *     summary="Marcar rutina como actual",
      *     tags={"Routine Assignments"},
      *     security={{"bearerAuth":{}}},

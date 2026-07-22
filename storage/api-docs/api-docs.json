@@ -18,6 +18,7 @@
                     "Authentication"
                 ],
                 "summary": "Register a new user",
+                "description": "Creates a new user account and sends a verification email. The email contains a link to the frontend route '/email/verify/{id}/{hash}?expires={timestamp}&signature={signature}', which the user must click to verify their email address. The frontend then calls 'GET /api/v1/auth/email/verify/{id}/{hash}' to complete the verification.",
                 "operationId": "19b9013ebbede2e559a91a6ddaa88651",
                 "requestBody": {
                     "required": true,
@@ -36,28 +37,34 @@
                                 "properties": {
                                     "email": {
                                         "type": "string",
-                                        "format": "email"
+                                        "format": "email",
+                                        "example": "trainer@example.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "minLength": 8
+                                        "minLength": 8,
+                                        "example": "SecurePass123!"
                                     },
                                     "user_type": {
                                         "type": "string",
                                         "enum": [
                                             "trainer",
                                             "student"
-                                        ]
+                                        ],
+                                        "example": "trainer"
                                     },
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "John"
                                     },
                                     "last_name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Doe"
                                     },
                                     "birth_date": {
                                         "type": "string",
-                                        "format": "date"
+                                        "format": "date",
+                                        "example": "1990-01-15"
                                     },
                                     "gender": {
                                         "type": "string",
@@ -65,11 +72,13 @@
                                             "male",
                                             "female",
                                             "other"
-                                        ]
+                                        ],
+                                        "example": "male"
                                     },
                                     "gym_goals": {
                                         "description": "Required for students",
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Gain muscle mass"
                                     }
                                 },
                                 "type": "object"
@@ -79,15 +88,35 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully",
+                        "description": "User registered successfully. A verification email has been sent.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "example": "User registered successfully"
                                         },
                                         "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email"
+                                                },
+                                                "user_type": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "last_name": {
+                                                    "type": "string"
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -96,8 +125,11 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Domain validation error (e.g., email already exists, underage user)"
+                    },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Request validation error"
                     }
                 }
             }
@@ -237,64 +269,61 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Verify email address",
+                "summary": "Verify email address (redirects to frontend)",
+                "description": "This endpoint is called from the frontend after user clicks the email verification link. The email link points to the frontend route '/email/verify/{id}/{hash}', which then calls this API endpoint. This endpoint validates the signature and redirects back to the frontend with the verification result.",
                 "operationId": "d4f4681b663a1389ef5c8177280dc90b",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "User ID (UUID)",
                         "required": true,
                         "schema": {
                             "type": "string",
                             "format": "uuid"
-                        }
+                        },
+                        "example": "409d151f-74f5-4db8-b131-048c645fdc2b"
                     },
                     {
                         "name": "hash",
                         "in": "path",
+                        "description": "SHA1 hash of user email",
                         "required": true,
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "example": "d56e2383710fe11ea9d7d7d91f33b11fa700b5ed"
                     },
                     {
                         "name": "expires",
                         "in": "query",
+                        "description": "Unix timestamp when link expires",
                         "required": true,
                         "schema": {
                             "type": "integer"
-                        }
+                        },
+                        "example": 1784712069
                     },
                     {
                         "name": "signature",
                         "in": "query",
+                        "description": "URL signature for verification",
                         "required": true,
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "example": "8a661dceb11d80560bb5164a6e2e532727b564a10232a874f71a9b6ce68af22c"
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Email verified successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                    "302": {
+                        "description": "Redirects to frontend - Success: /verification-success, Failure: /verification-failed"
                     },
                     "403": {
-                        "description": "Invalid or expired verification link"
+                        "description": "Invalid or expired signature - Redirects to /verification-failed?reason=invalid"
                     },
                     "404": {
-                        "description": "User not found"
+                        "description": "User not found - Redirects to /verification-failed?reason=not_found"
                     }
                 }
             }
@@ -1290,13 +1319,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students": {
+        "/gyms/{gymId}/students": {
             "get": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Listar alumnos de un gimnasio",
-                "operationId": "38de82bef58500a734ca2610788c9b85",
+                "operationId": "820dfc8564d6ccdc8c897075ce98f425",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1333,7 +1362,7 @@
                     "Gym Students"
                 ],
                 "summary": "Matricular alumno en un gimnasio",
-                "operationId": "1fd931e3cc88a49f3a8746fb31d5810b",
+                "operationId": "271c279cb0789004b6210d0c9c4b3fef",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1394,13 +1423,13 @@
                 ]
             }
         },
-        "/api/v1/personal-training/students": {
+        "/personal-training/students": {
             "post": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Matricular alumno en entrenamiento personal",
-                "operationId": "d5ac0dc9e000a33d5f99dbbc5359908a",
+                "operationId": "3e8c33fb75ba2bba226da13003084047",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1447,13 +1476,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}": {
+        "/gyms/{gymId}/students/{studentId}": {
             "put": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Modificar cuota de un alumno",
-                "operationId": "3db25c531e14379a4fc7dd9e769dc16f",
+                "operationId": "59570e5c3abce531f1d5c3d255201d71",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1522,7 +1551,7 @@
                     "Gym Students"
                 ],
                 "summary": "Dar de baja a un alumno (baja lógica)",
-                "operationId": "d394c7424a0cb43d4fd47ea8c1c6784a",
+                "operationId": "134d38a9a79b41782ee90c508a1c1b59",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1564,13 +1593,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}/deactivate": {
+        "/gyms/{gymId}/students/{studentId}/deactivate": {
             "put": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Dar de baja a un alumno activo",
-                "operationId": "9323179a12adb2e2cda14d89e2c3e7f0",
+                "operationId": "ec2de7a69b5e0034f66b92d8e6316cca",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1612,13 +1641,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}/reactivate": {
+        "/gyms/{gymId}/students/{studentId}/reactivate": {
             "put": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Dar de alta a un alumno inactivo",
-                "operationId": "c3f8705d64f768180fce4b4019cee28d",
+                "operationId": "fe8597cbada3079d19c12ebdc95e9ff6",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1683,13 +1712,13 @@
                 ]
             }
         },
-        "/api/v1/students": {
+        "/students": {
             "get": {
                 "tags": [
                     "Gym Students"
                 ],
                 "summary": "Listar todos los alumnos de todos los gimnasios del entrenador",
-                "operationId": "8f763de7be2e28bc042aa889853bd6ae",
+                "operationId": "23a037eb44d6ce2603e81ec4b2f1a4ef",
                 "responses": {
                     "200": {
                         "description": "Lista de todos los alumnos"
@@ -1705,13 +1734,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}/routines": {
+        "/gyms/{gymId}/students/{studentId}/routines": {
             "get": {
                 "tags": [
                     "Routine Assignments"
                 ],
                 "summary": "Listar rutinas asignadas a un alumno en un gimnasio",
-                "operationId": "c7ab27cd4691781c6ccccdf68be74ca6",
+                "operationId": "ab124cb17ca869767a8209d56b12a170",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1754,7 +1783,7 @@
                     "Routine Assignments"
                 ],
                 "summary": "Asignar rutina a un alumno",
-                "operationId": "2f56e0b65302e2e714822011cc5b4da9",
+                "operationId": "1a42e21deb299613f24b153c4fc58482",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1825,13 +1854,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}": {
+        "/gyms/{gymId}/students/{studentId}/routines/{assignmentId}": {
             "put": {
                 "tags": [
                     "Routine Assignments"
                 ],
                 "summary": "Actualizar asignación de rutina",
-                "operationId": "1fb1869454ba881de4102e53b2aaf386",
+                "operationId": "eed5e1ef94bcb2d34e046611a5afc473",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1914,7 +1943,7 @@
                     "Routine Assignments"
                 ],
                 "summary": "Eliminar asignación de rutina",
-                "operationId": "1d0bb85b854909a2e4570e6a2c004fa8",
+                "operationId": "429d10f0de60ba4c17f99d987aaba097",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -1965,13 +1994,13 @@
                 ]
             }
         },
-        "/api/v1/gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current": {
+        "/gyms/{gymId}/students/{studentId}/routines/{assignmentId}/set-current": {
             "put": {
                 "tags": [
                     "Routine Assignments"
                 ],
                 "summary": "Marcar rutina como actual",
-                "operationId": "ed0307cf6a6f8d31578e8ac52f889287",
+                "operationId": "720b2af7f9ebeeb3be2fa909050dea7e",
                 "parameters": [
                     {
                         "name": "gymId",
@@ -2347,13 +2376,593 @@
                 ]
             }
         },
-        "/api/v1/students/me/gyms": {
+        "/students/{studentId}/statistics/routines": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get routine execution statistics for a student (Trainer only)",
+                "description": "Trainer endpoint: Get routine stats for a specific student",
+                "operationId": "7c0b11a6a5e3bbb46ca105a95846a35b",
+                "parameters": [
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "description": "Student ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Routine execution statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "routine_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "routine_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "times_executed": {
+                                                        "type": "integer"
+                                                    },
+                                                    "first_session_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "last_session_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Student does not belong to trainer"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/statistics/routines": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get own routine execution statistics (Student only)",
+                "description": "Student endpoint: Get own routine stats",
+                "operationId": "33d7db0276b51a88426a4a6689401186",
+                "responses": {
+                    "200": {
+                        "description": "Routine execution statistics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "routine_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "routine_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "times_executed": {
+                                                        "type": "integer"
+                                                    },
+                                                    "first_session_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "last_session_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/{studentId}/statistics/exercise-weight-history": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get weight progression history for a student's exercise (Trainer only)",
+                "description": "Trainer endpoint: Get exercise weight history for a specific student",
+                "operationId": "b528c62b6233e0c5fac3259324a70cc6",
+                "parameters": [
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "description": "Student ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "exercise_id",
+                        "in": "query",
+                        "description": "Exercise ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "reps",
+                        "in": "query",
+                        "description": "Number of reps",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Weight history progression",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "weight": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "reps": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Student does not belong to trainer"
+                    },
+                    "422": {
+                        "description": "Validation error - Missing required parameters"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/statistics/exercise-weight-history": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get own weight progression history for an exercise (Student only)",
+                "description": "Student endpoint: Get own exercise weight history",
+                "operationId": "d79534f007f6e6c26961a95faf0eddad",
+                "parameters": [
+                    {
+                        "name": "exercise_id",
+                        "in": "query",
+                        "description": "Exercise ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "reps",
+                        "in": "query",
+                        "description": "Number of reps",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Weight history progression",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "weight": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "reps": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error - Missing required parameters"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/gyms/{gymId}/statistics/active-students": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get list of active students in a gym (Trainer only)",
+                "description": "Trainer endpoint: Get gym active students with full details",
+                "operationId": "912b4e55481ea6a4770e993acbfa6b0f",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "description": "Gym ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of active students with workout details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "student_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "student_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "last_workout_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not authorized to access this gym"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/gyms/{gymId}/statistics/active-students": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get count of active students in gym (Student only)",
+                "description": "Student endpoint: Get gym active students count only (privacy)",
+                "operationId": "537b398ff0fff270346f87b97a21c9f5",
+                "parameters": [
+                    {
+                        "name": "gymId",
+                        "in": "path",
+                        "description": "Gym ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Total count of active students",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_active_students": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not enrolled in this gym"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/{studentId}/statistics/exercises-executed": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get list of all exercises executed by a student (Trainer only)",
+                "description": "Trainer endpoint: Get executed exercises for a specific student",
+                "operationId": "fa34f313c85bab426bb2d9beb8baa2f9",
+                "parameters": [
+                    {
+                        "name": "studentId",
+                        "in": "path",
+                        "description": "Student ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of executed exercises with details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "exercise_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "exercise_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "muscle_group": {
+                                                        "type": "string"
+                                                    },
+                                                    "unique_reps": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "total_executions": {
+                                                        "type": "integer"
+                                                    },
+                                                    "first_executed_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "last_executed_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Student does not belong to trainer"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/statistics/exercises-executed": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get list of all exercises executed by student (Student only)",
+                "description": "Student endpoint: Get own executed exercises",
+                "operationId": "9c220ece4968e476aa95e62e82287e28",
+                "responses": {
+                    "200": {
+                        "description": "List of executed exercises with details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "exercise_id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "exercise_name": {
+                                                        "type": "string"
+                                                    },
+                                                    "muscle_group": {
+                                                        "type": "string"
+                                                    },
+                                                    "unique_reps": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "total_executions": {
+                                                        "type": "integer"
+                                                    },
+                                                    "first_executed_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "last_executed_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/students/me/gyms": {
             "get": {
                 "tags": [
                     "Student Gyms"
                 ],
                 "summary": "List all gyms where student is actively enrolled",
-                "operationId": "f6c754860ad0ec53cfee50b4820d3459",
+                "operationId": "8a7866e3b61e3ad0054612a500af7fe5",
                 "responses": {
                     "200": {
                         "description": "List of gyms with enrollment details",
@@ -2452,13 +3061,13 @@
                 ]
             }
         },
-        "/api/v1/students/me/routines": {
+        "/students/me/routines": {
             "get": {
                 "tags": [
                     "Student Routines"
                 ],
                 "summary": "List all assigned routines for authenticated student",
-                "operationId": "8f98b9f5e9756a758cb9768c53d34397",
+                "operationId": "40aacc519d4e12851fcb0e9fe91ddcfc",
                 "parameters": [
                     {
                         "name": "page",
@@ -2556,13 +3165,13 @@
                 ]
             }
         },
-        "/api/v1/students/me/routines/current": {
+        "/students/me/routines/current": {
             "get": {
                 "tags": [
                     "Student Routines"
                 ],
                 "summary": "List only current routines for authenticated student",
-                "operationId": "c414d26a190558b1ec55af62a0cb632a",
+                "operationId": "8cc173ebc519048213953bf0c8667132",
                 "parameters": [
                     {
                         "name": "page",
@@ -3166,6 +3775,10 @@
         {
             "name": "Routines",
             "description": "Routine management endpoints"
+        },
+        {
+            "name": "Statistics",
+            "description": "Statistics and analytics endpoints for trainers and students"
         },
         {
             "name": "Student Gyms",

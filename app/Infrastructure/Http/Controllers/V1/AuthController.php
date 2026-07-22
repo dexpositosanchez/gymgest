@@ -81,30 +81,40 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/auth/register",
      *     summary="Register a new user",
+     *     description="Creates a new user account and sends a verification email. The email contains a link to the frontend route '/email/verify/{id}/{hash}?expires={timestamp}&signature={signature}', which the user must click to verify their email address. The frontend then calls 'GET /api/v1/auth/email/verify/{id}/{hash}' to complete the verification.",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password","user_type","name","last_name","birth_date","gender"},
-     *             @OA\Property(property="email", type="string", format="email"),
-     *             @OA\Property(property="password", type="string", minLength=8),
-     *             @OA\Property(property="user_type", type="string", enum={"trainer","student"}),
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="last_name", type="string"),
-     *             @OA\Property(property="birth_date", type="string", format="date"),
-     *             @OA\Property(property="gender", type="string", enum={"male","female","other"}),
-     *             @OA\Property(property="gym_goals", type="string", description="Required for students")
+     *             @OA\Property(property="email", type="string", format="email", example="trainer@example.com"),
+     *             @OA\Property(property="password", type="string", minLength=8, example="SecurePass123!"),
+     *             @OA\Property(property="user_type", type="string", enum={"trainer","student"}, example="trainer"),
+     *             @OA\Property(property="name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="1990-01-15"),
+     *             @OA\Property(property="gender", type="string", enum={"male","female","other"}, example="male"),
+     *             @OA\Property(property="gym_goals", type="string", description="Required for students", example="Gain muscle mass")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="User registered successfully",
+     *         description="User registered successfully. A verification email has been sent.",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="user", type="object")
+     *             @OA\Property(property="message", type="string", example="User registered successfully"),
+     *             @OA\Property(
+     *                 property="user",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="string", format="uuid"),
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 @OA\Property(property="user_type", type="string"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="last_name", type="string")
+     *             )
      *         )
      *     ),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(response=400, description="Domain validation error (e.g., email already exists, underage user)"),
+     *     @OA\Response(response=422, description="Request validation error")
      * )
      */
     public function register(RegisterUserRequest $request): JsonResponse
@@ -259,41 +269,47 @@ class AuthController extends Controller
     /**
      * @OA\Get(
      *     path="/auth/email/verify/{id}/{hash}",
-     *     summary="Verify email address",
+     *     summary="Verify email address (redirects to frontend)",
+     *     description="This endpoint is called from the frontend after user clicks the email verification link. The email link points to the frontend route '/email/verify/{id}/{hash}', which then calls this API endpoint. This endpoint validates the signature and redirects back to the frontend with the verification result.",
      *     tags={"Authentication"},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         @OA\Schema(type="string", format="uuid")
+     *         description="User ID (UUID)",
+     *         @OA\Schema(type="string", format="uuid"),
+     *         example="409d151f-74f5-4db8-b131-048c645fdc2b"
      *     ),
      *     @OA\Parameter(
      *         name="hash",
      *         in="path",
      *         required=true,
-     *         @OA\Schema(type="string")
+     *         description="SHA1 hash of user email",
+     *         @OA\Schema(type="string"),
+     *         example="d56e2383710fe11ea9d7d7d91f33b11fa700b5ed"
      *     ),
      *     @OA\Parameter(
      *         name="expires",
      *         in="query",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         description="Unix timestamp when link expires",
+     *         @OA\Schema(type="integer"),
+     *         example=1784712069
      *     ),
      *     @OA\Parameter(
      *         name="signature",
      *         in="query",
      *         required=true,
-     *         @OA\Schema(type="string")
+     *         description="URL signature for verification",
+     *         @OA\Schema(type="string"),
+     *         example="8a661dceb11d80560bb5164a6e2e532727b564a10232a874f71a9b6ce68af22c"
      *     ),
      *     @OA\Response(
-     *         response=200,
-     *         description="Email verified successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string")
-     *         )
+     *         response=302,
+     *         description="Redirects to frontend - Success: /verification-success, Failure: /verification-failed"
      *     ),
-     *     @OA\Response(response=403, description="Invalid or expired verification link"),
-     *     @OA\Response(response=404, description="User not found")
+     *     @OA\Response(response=403, description="Invalid or expired signature - Redirects to /verification-failed?reason=invalid"),
+     *     @OA\Response(response=404, description="User not found - Redirects to /verification-failed?reason=not_found")
      * )
      */
     public function verify(Request $request, string $id, string $hash)
