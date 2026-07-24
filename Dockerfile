@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     redis-tools \
-    postgresql-client
+    postgresql-client \
+    nginx \
+    supervisor
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -49,8 +51,20 @@ RUN chown -R www-data:www-data \
     /var/www/storage \
     /var/www/bootstrap/cache
 
-# Expose port 9000
-EXPOSE 9000
+# Configure Nginx
+RUN mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+COPY nginx.conf /etc/nginx/sites-available/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Use entrypoint to run migrations and start php-fpm
+# Configure Supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create necessary directories for supervisor
+RUN mkdir -p /var/log/supervisor
+
+# Expose port 8080 (Nginx will listen here)
+EXPOSE 8080
+
+# Use entrypoint to run migrations and start services
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
