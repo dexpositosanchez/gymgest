@@ -1,4 +1,3 @@
-cat > ~/Documents/dev/gymgest/backend/entrypoint.prod.sh << 'EOF'
 #!/bin/bash
 set -e
 
@@ -28,6 +27,3 @@ php artisan schedule:work &
 
 echo "Starting PHP-FPM..."
 exec php-fpm
-EOF
-
-chmod +x ~/Documents/dev/gymgest/backend/entrypoint.prod.sh
