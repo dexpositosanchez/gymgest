@@ -25,5 +25,5 @@ php artisan l5-swagger:generate
 echo "Starting Laravel Scheduler in background..."
 php artisan schedule:work &
 
-echo "Starting PHP-FPM..."
-exec php-fpm
+echo "Starting Laravel server..."
+exec php artisan serve --host=0.0.0.0 --port=10000
