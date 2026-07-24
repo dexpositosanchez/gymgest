@@ -29,9 +29,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Copy existing application directory contents
-COPY . /var/www
-
-# Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www
 
 # Install dependencies
@@ -40,9 +37,11 @@ RUN composer install --no-dev --optimize-autoloader
 # Generate JWT secret if not exists
 RUN php artisan jwt:secret --force || true
 
-# Copy entrypoint script
+# Copy entrypoint scripts
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY entrypoint.prod.sh /usr/local/bin/entrypoint.prod.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.prod.sh
 
 # Set permissions
 RUN chown -R www-data:www-data \
@@ -52,5 +51,5 @@ RUN chown -R www-data:www-data \
 # Expose port 9000
 EXPOSE 9000
 
-# Use entrypoint to run migrations and start php-fpm
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# Use entrypoint based on environment
+CMD ["/bin/bash", "-c", "if [ \"$APP_ENV\" = \"production\" ]; then /usr/local/bin/entrypoint.prod.sh; else /usr/local/bin/entrypoint.sh; fi"]
