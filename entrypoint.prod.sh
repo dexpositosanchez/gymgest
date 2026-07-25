@@ -1,13 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for PostgreSQL to be ready..."
-until php artisan db:show --json 2>/dev/null | grep -q "driver"; do
-  >&2 echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
-
-echo "PostgreSQL is up - executing migrations"
+echo "Running migrations..."
 php artisan migrate --force
 
 echo "Checking if database needs seeding..."
@@ -25,5 +19,5 @@ php artisan l5-swagger:generate
 echo "Starting Laravel Scheduler in background..."
 php artisan schedule:work &
 
-echo "Starting Laravel server..."
-exec php artisan serve --host=0.0.0.0 --port=10000
+echo "Starting Apache..."
+exec apache2-foreground
