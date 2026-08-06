@@ -11,6 +11,11 @@ if [ "$MUSCLE_GROUPS_COUNT" = "0" ]; then
   echo "Database is empty - running base seeders"
   php artisan db:seed --class=MuscleGroupSeeder --force
   php artisan db:seed --class=DefaultExerciseSeeder --force
+
+  if [ "$APP_SEED_DEV_DATA" = "true" ]; then
+    echo "Loading dev data..."
+    php artisan db:seed --class=DevDataSeeder --force
+  fi
 fi
 
 echo "Generating Swagger documentation..."
