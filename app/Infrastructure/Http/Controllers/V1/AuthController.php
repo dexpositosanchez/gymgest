@@ -147,7 +147,7 @@ class AuthController extends Controller
         } catch (\DomainException $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Registration failed'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
