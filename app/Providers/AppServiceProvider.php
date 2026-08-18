@@ -43,7 +43,7 @@ use App\Domain\RoutineAssignment\Services\RoutineAssignmentCacheServiceInterface
 use App\Domain\ExerciseWeightHistory\Services\WeightHistoryCacheServiceInterface;
 use App\Infrastructure\Auth\JWTTokenService;
 use App\Infrastructure\Auth\LaravelPasswordResetService;
-use App\Infrastructure\Mail\LaravelEmailService;
+use App\Infrastructure\Mail\ResendEmailService;
 use App\Infrastructure\Cache\RoutineAssignmentCacheService;
 use App\Infrastructure\Cache\WeightHistoryCacheService;
 use Illuminate\Support\ServiceProvider;
@@ -162,7 +162,7 @@ class AppServiceProvider extends ServiceProvider
         // Mail services
         $this->app->bind(
             EmailServiceInterface::class,
-            LaravelEmailService::class
+            ResendEmailService::class
         );
 
         // Cache services
@@ -186,8 +186,5 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         GymStudentEloquentModel::observe(GymStudentObserver::class);
-        \Illuminate\Support\Facades\Mail::extend('resend', function () {
-            return new \App\Mail\ResendTransport(config('services.resend.api_key'));
-        });
     }
 }
