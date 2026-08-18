@@ -20,7 +20,7 @@ API REST para el sistema de gestión de gimnasio GymGest. Permite a entrenadores
 - **Composer 2.x**
 - **PostgreSQL 13** (si se ejecuta sin Docker)
 - **Redis 7** (si se ejecuta sin Docker)
-- **Cuenta en Resend** para el envío de emails (ver sección de configuración)
+- **Cuenta de Gmail** con verificación en 2 pasos activada (para envío de emails)
 
 ## Instalación
 
@@ -138,26 +138,37 @@ Clave secreta para firmar tokens JWT. Genera con:
 php artisan jwt:secret
 ```
 
-#### `MAIL_*` (Email con Resend)
+#### `MAIL_*` (Gmail SMTP)
+Configuración de email para verificación de usuarios y recuperación de contraseña.
 
-El sistema usa [Resend](https://resend.com) para el envío de emails de verificación de cuenta y recuperación de contraseña.
+**Pasos para configurar Gmail:**
 
-**Pasos para configurar Resend:**
+1. **Activa la verificación en 2 pasos** en tu cuenta de Google:
+   https://myaccount.google.com/security
 
-1. Crea una cuenta gratuita en [resend.com](https://resend.com)
-2. Genera una API key en el dashboard de Resend
-3. Configura las variables en `.env`:
+2. **Genera una contraseña de aplicación**:
+   https://myaccount.google.com/apppasswords
+
+3. **Configura las variables en `.env`**:
 
 ```env
-MAIL_MAILER=resend
-RESEND_API_KEY=tu_api_key_de_resend
-MAIL_FROM_ADDRESS=onboarding@resend.dev
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu-email@gmail.com
+MAIL_PASSWORD=abcd-efgh-ijkl-mnop
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=tu-email@gmail.com
 MAIL_FROM_NAME="GymGest"
 ```
 
-El plan gratuito de Resend incluye **3000 emails/mes** y no requiere dominio propio para pruebas — puedes enviar desde `onboarding@resend.dev`. Si quieres usar tu propio dominio, verifícalo en el dashboard de Resend y cambia `MAIL_FROM_ADDRESS`.
+**Nota:** Sin esta configuración, el registro de usuarios no funcionará porque la verificación de email es obligatoria.
 
-**Nota:** Sin esta configuración, el registro de usuarios fallará porque la verificación de email es obligatoria.
+**Comando de prueba:**
+
+```bash
+php artisan email:test tu@email.com
+```
 
 #### `IDEMPOTENCY_TTL_HOURS`
 Tiempo de vida (TTL) en horas para las claves de idempotencia. Las respuestas se cachean en Redis durante este período.
@@ -199,10 +210,10 @@ make cache-clear
 make test
 ```
 
-O directamente dentro del contenedor:
+O directamente:
 
 ```bash
-docker exec gymgest_backend ./vendor/bin/phpunit
+./vendor/bin/phpunit
 ```
 
 **Estado actual:** 275 tests, 611 assertions ✅
@@ -242,6 +253,7 @@ Distribuidos entre los entrenadores con patrón 7-2-1:
 - **Nombre:** Student Number 1, Student Number 2, etc.
 - **Género:** Distribuidos entre male, female, other (ciclo de 3)
 - **Fecha nacimiento:** Años 90 (1995-01-15 ... 1995-09-15)
+- **Gym Goals:** "Mejorar condición física"
 - **Email verificado:** ✅ Sí
 - **Nota:** Los students NO pueden hacer login en la app web (solo trainers)
 
@@ -297,6 +309,10 @@ docker exec gymgest_backend php artisan db:seed --class=DevDataSeeder --force
 php artisan db:seed --class=DevDataSeeder
 ```
 
+#### Opción 3: Automáticamente en primer arranque
+
+La **primera vez** que levantas el stack con base de datos vacía, el script `entrypoint.sh` preguntará interactivamente si quieres cargar datos de desarrollo tras ejecutar los seeders base (muscle groups + exercises).
+
 ### Idempotencia del Seeder
 
 El `DevDataSeeder` usa `firstOrCreate()` con el email como clave única, por lo que:
@@ -351,19 +367,6 @@ La API está versionada (actualmente v1) y accesible en `/api/v1`.
 
 **Nota:** Solo usuarios de tipo `trainer` pueden hacer login. Los `student` pueden registrarse pero no acceder a la aplicación web.
 
-## Despliegue en Producción
-
-GymGest está desplegado en una arquitectura de servicios gratuitos en la nube:
-
-- **Backend (API):** [Render](https://render.com) — Docker con Apache + PHP 8.1. Redeploy automático en cada push a `main`.
-- **Base de datos:** [Supabase](https://supabase.com) — PostgreSQL gestionado (plan Nano gratuito).
-- **Caché:** [Upstash](https://upstash.com) — Redis gestionado. Plan gratuito.
-- **Monitorización:** [UptimeRobot](https://uptimerobot.com) — Ping cada 5 minutos para mantener el servicio activo.
-
-**URLs de producción:**
-- API: `https://gymgest.onrender.com/api/v1`
-- Documentación: `https://gymgest.onrender.com/api/documentation`
-
 ## Idempotencia
 
 Todos los endpoints de escritura (POST/PUT/PATCH) soportan idempotencia opcional mediante Redis.
@@ -373,9 +376,9 @@ Todos los endpoints de escritura (POST/PUT/PATCH) soportan idempotencia opcional
 Incluye el header `Idempotency-Key` con un UUID único por operación:
 
 ```bash
-curl -X POST https://localhost/api/v1/auth/register \
-  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \
-  -H "Content-Type: application/json" \
+curl -X POST https://localhost/api/v1/auth/register \\
+  -H "Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000" \\
+  -H "Content-Type: application/json" \\
   -d '{"email":"user@example.com", ...}'
 ```
 
@@ -408,6 +411,4 @@ curl -X POST https://localhost/api/v1/auth/register \
 
 ## Licencia
 
-MIT License
-
-Copyright (c) 2026 David Expósito Sánchez
+[Por definir]

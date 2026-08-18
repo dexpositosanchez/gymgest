@@ -13,6 +13,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "predis/predis": "^3.5",
+        "resend/resend-php": "^1.9",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {

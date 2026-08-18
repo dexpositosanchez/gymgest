@@ -186,5 +186,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         GymStudentEloquentModel::observe(GymStudentObserver::class);
+        \Illuminate\Support\Facades\Mail::extend('resend', function () {
+            return new \App\Mail\ResendTransport(config('services.resend.api_key'));
+        });
     }
 }

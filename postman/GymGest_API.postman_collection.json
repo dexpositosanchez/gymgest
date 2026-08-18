@@ -1,0 +1,1948 @@
+{
+	"info": {
+		"_postman_id": "gymgest-api-v1",
+		"name": "GymGest API v1",
+		"description": "Colección completa de endpoints para GymGest API.\n\n**Configuración:**\n1. Importar esta colección en Postman\n2. Crear un Environment con las variables definidas abajo\n3. Ejecutar \"Register (Trainer)\" o \"Login (Trainer)\" para obtener token\n4. Los tokens e IDs se guardan automáticamente en variables\n\n**Variables de entorno necesarias:**\n- base_url: http://localhost:8000/api/v1\n- trainer_email\n- trainer_password\n- trainer_token (auto)\n- trainer_id (auto)\n- student_email\n- student_password\n- student_token (auto)\n- student_id (auto)\n- gym_id (auto)\n- routine_id (auto)\n- assignment_id (auto)\n- session_id (auto)\n- exercise_id (auto)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{trainer_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "🔐 Auth",
+			"item": [
+				{
+					"name": "Register (Trainer)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set(\"trainer_token\", jsonData.token);",
+									"        console.log(\"✅ Trainer token guardado\");",
+									"    }",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.environment.set(\"trainer_id\", jsonData.user.id);",
+									"        console.log(\"✅ Trainer ID guardado:\", jsonData.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Entrenador\",\n    \"last_name\": \"Test\",\n    \"email\": \"{{trainer_email}}\",\n    \"password\": \"{{trainer_password}}\",\n    \"password_confirmation\": \"{{trainer_password}}\",\n    \"role\": \"trainer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registrar un nuevo entrenador.\n\n**Request Body:**\n- name: string (requerido)\n- last_name: string (requerido)\n- email: string (requerido, único)\n- password: string (requerido, mínimo 6 caracteres)\n- password_confirmation: string (requerido, debe coincidir)\n- role: \"trainer\" (requerido)\n\n**Response 201:**\n```json\n{\n    \"user\": {\n        \"id\": \"uuid\",\n        \"name\": \"Entrenador\",\n        \"last_name\": \"Test\",\n        \"email\": \"trainer@example.com\",\n        \"role\": \"trainer\",\n        \"email_verified_at\": null\n    },\n    \"token\": \"jwt_token_here\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Register (Student)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set(\"student_token\", jsonData.token);",
+									"        console.log(\"✅ Student token guardado\");",
+									"    }",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.environment.set(\"student_id\", jsonData.user.id);",
+									"        console.log(\"✅ Student ID guardado:\", jsonData.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Alumno\",\n    \"last_name\": \"Test\",\n    \"email\": \"{{student_email}}\",\n    \"password\": \"{{student_password}}\",\n    \"password_confirmation\": \"{{student_password}}\",\n    \"role\": \"student\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registrar un nuevo alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Trainer)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set(\"trainer_token\", jsonData.token);",
+									"        console.log(\"✅ Trainer token guardado\");",
+									"    }",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.environment.set(\"trainer_id\", jsonData.user.id);",
+									"        console.log(\"✅ Trainer ID guardado:\", jsonData.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{trainer_email}}\",\n    \"password\": \"{{trainer_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Iniciar sesión como entrenador."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Student)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set(\"student_token\", jsonData.token);",
+									"        console.log(\"✅ Student token guardado\");",
+									"    }",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.environment.set(\"student_id\", jsonData.user.id);",
+									"        console.log(\"✅ Student ID guardado:\", jsonData.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{student_email}}\",\n    \"password\": \"{{student_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Iniciar sesión como alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Obtener información del usuario autenticado."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Cerrar sesión."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticación y gestión de sesión."
+		},
+		{
+			"name": "🏋️ Trainer - Gyms",
+			"item": [
+				{
+					"name": "List Gyms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        pm.environment.set(\"gym_id\", jsonData.data[0].id);",
+									"        console.log(\"✅ Gym ID guardado:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms"
+							]
+						},
+						"description": "Listar todos los gimnasios del entrenador."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"gym_id\", jsonData.data.id);",
+									"        console.log(\"✅ Gym ID guardado:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gimnasio Test\",\n    \"address\": \"Calle Principal 123\",\n    \"locality\": \"Madrid\",\n    \"province\": \"Madrid\",\n    \"country\": \"España\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms"
+							]
+						},
+						"description": "Crear un nuevo gimnasio."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Gym Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}"
+							]
+						},
+						"description": "Obtener detalles de un gimnasio específico."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gimnasio Test Actualizado\",\n    \"address\": \"Calle Principal 456\",\n    \"locality\": \"Madrid\",\n    \"province\": \"Madrid\",\n    \"country\": \"España\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}"
+							]
+						},
+						"description": "Actualizar un gimnasio existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/toggle",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"toggle"
+							]
+						},
+						"description": "Activar/desactivar un gimnasio."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}"
+							]
+						},
+						"description": "Eliminar un gimnasio."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Personal Training Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/personal-training",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"personal-training"
+							]
+						},
+						"description": "Obtener o crear gimnasio de entrenamiento personal."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de gimnasios (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "🏋️ Trainer - Exercises",
+			"item": [
+				{
+					"name": "List Exercises",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        pm.environment.set(\"exercise_id\", jsonData.data[0].id);",
+									"        console.log(\"✅ Exercise ID guardado:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"exercises"
+							]
+						},
+						"description": "Listar ejercicios disponibles (predefinidos + personalizados del entrenador)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Muscle Groups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/muscle-groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"muscle-groups"
+							]
+						},
+						"description": "Obtener lista de grupos musculares."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de ejercicios (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "🏋️ Trainer - Routines",
+			"item": [
+				{
+					"name": "List Routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        pm.environment.set(\"routine_id\", jsonData.data[0].id);",
+									"        console.log(\"✅ Routine ID guardado:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"routines"
+							]
+						},
+						"description": "Listar rutinas del entrenador."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"routine_id\", jsonData.data.id);",
+									"        console.log(\"✅ Routine ID guardado:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Rutina Test\",\n    \"description\": \"Rutina de prueba\",\n    \"difficulty\": \"intermediate\",\n    \"days\": [\n        {\n            \"day_number\": 1,\n            \"name\": \"Día 1 - Pecho y Tríceps\",\n            \"exercises\": [\n                {\n                    \"exercise_id\": \"{{exercise_id}}\",\n                    \"order_index\": 1,\n                    \"notes\": \"Controlar la fase excéntrica\",\n                    \"sets\": [\n                        {\n                            \"set_number\": 1,\n                            \"reps\": 10,\n                            \"notes\": null\n                        },\n                        {\n                            \"set_number\": 2,\n                            \"reps\": 10,\n                            \"notes\": null\n                        },\n                        {\n                            \"set_number\": 3,\n                            \"reps\": 8,\n                            \"notes\": \"Serie al fallo\"\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"routines"
+							]
+						},
+						"description": "Crear una nueva rutina."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de rutinas (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "🏋️ Trainer - Students",
+			"item": [
+				{
+					"name": "List All Students",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Listar todos los alumnos de todos los gimnasios del entrenador."
+					},
+					"response": []
+				},
+				{
+					"name": "List Gym Students",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"students"
+							]
+						},
+						"description": "Listar alumnos de un gimnasio específico."
+					},
+					"response": []
+				},
+				{
+					"name": "Enroll Student in Gym",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{student_email}}\",\n    \"quota_expires_at\": \"2026-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"students"
+							]
+						},
+						"description": "Matricular un alumno en un gimnasio."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de alumnos (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "🏋️ Trainer - Routine Assignments",
+			"item": [
+				{
+					"name": "List Student Routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0) {",
+									"        pm.environment.set(\"assignment_id\", jsonData.data[0].id);",
+									"        console.log(\"✅ Assignment ID guardado:\", jsonData.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"students",
+								"{{student_id}}",
+								"routines"
+							]
+						},
+						"description": "Listar rutinas asignadas a un alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Routine to Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"assignment_id\", jsonData.data.id);",
+									"        console.log(\"✅ Assignment ID guardado:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"routine_id\": \"{{routine_id}}\",\n    \"starts_at\": \"2026-07-20\",\n    \"is_current\": true,\n    \"notes\": \"Rutina de prueba\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/students/{{student_id}}/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"students",
+								"{{student_id}}",
+								"routines"
+							]
+						},
+						"description": "Asignar una rutina a un alumno."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de asignación de rutinas (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "🏋️ Trainer - Statistics",
+			"item": [
+				{
+					"name": "Get Student Routine Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/{{student_id}}/statistics/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"{{student_id}}",
+								"statistics",
+								"routines"
+							]
+						},
+						"description": "Obtener estadísticas de rutinas ejecutadas por un alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Exercise Weight History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/{{student_id}}/statistics/exercise-weight-history?exercise_id={{exercise_id}}&reps=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"{{student_id}}",
+								"statistics",
+								"exercise-weight-history"
+							],
+							"query": [
+								{
+									"key": "exercise_id",
+									"value": "{{exercise_id}}"
+								},
+								{
+									"key": "reps",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Obtener historial de pesos de un ejercicio específico para un alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Executed Exercises",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/{{student_id}}/statistics/exercises-executed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"{{student_id}}",
+								"statistics",
+								"exercises-executed"
+							]
+						},
+						"description": "Obtener lista de ejercicios ejecutados por un alumno."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Gym Active Students",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/gyms/{{gym_id}}/statistics/active-students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"gyms",
+								"{{gym_id}}",
+								"statistics",
+								"active-students"
+							]
+						},
+						"description": "Obtener alumnos actualmente entrenando en un gimnasio."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de estadísticas (solo entrenadores).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{trainer_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "👤 Student - Routines",
+			"item": [
+				{
+					"name": "List My Routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"routines"
+							]
+						},
+						"description": "Obtener mis rutinas asignadas."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Current Routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/routines/current",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"routines",
+								"current"
+							]
+						},
+						"description": "Obtener mi rutina actual."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de rutinas (solo alumnos).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{student_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "👤 Student - Gyms",
+			"item": [
+				{
+					"name": "List My Gyms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/gyms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"gyms"
+							]
+						},
+						"description": "Obtener mis gimnasios activos."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gimnasios (solo alumnos).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{student_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "👤 Student - Workout Sessions",
+			"item": [
+				{
+					"name": "Start Workout Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"session_id\", jsonData.data.id);",
+									"        console.log(\"✅ Session ID guardado:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"routine_assignment_id\": \"{{assignment_id}}\",\n    \"day_number\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions"
+							]
+						},
+						"description": "Iniciar una sesión de entrenamiento."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Workout Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.id) {",
+									"        pm.environment.set(\"session_id\", jsonData.data.id);",
+									"        console.log(\"✅ Session ID guardado:\", jsonData.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions",
+								"active"
+							]
+						},
+						"description": "Obtener sesión de entrenamiento activa."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exercise Sets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{session_id}}/exercises/{{exercise_id}}/sets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions",
+								"{{session_id}}",
+								"exercises",
+								"{{exercise_id}}",
+								"sets"
+							]
+						},
+						"description": "Obtener series de un ejercicio para ejecutar."
+					},
+					"response": []
+				},
+				{
+					"name": "Execute Set",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"set_number\": 1,\n    \"reps_completed\": 10,\n    \"weight_used\": 50.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{session_id}}/exercises/{{exercise_id}}/sets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions",
+								"{{session_id}}",
+								"exercises",
+								"{{exercise_id}}",
+								"sets"
+							]
+						},
+						"description": "Ejecutar una serie de un ejercicio.\n\n**IMPORTANTE (TASK_034):**\n- `set_number` debe existir en la configuración del ejercicio\n- `reps_completed` debe coincidir EXACTAMENTE con las reps configuradas\n- Si `weight_used` es igual al último peso registrado, NO se actualiza el historial"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Exercise as Complete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{session_id}}/exercises/{{exercise_id}}/mark-complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions",
+								"{{session_id}}",
+								"exercises",
+								"{{exercise_id}}",
+								"mark-complete"
+							]
+						},
+						"description": "Marcar un ejercicio como completado manualmente."
+					},
+					"response": []
+				},
+				{
+					"name": "Finish Workout Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions/{{session_id}}/finish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions",
+								"{{session_id}}",
+								"finish"
+							]
+						},
+						"description": "Finalizar sesión de entrenamiento."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Session History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/workout-sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"workout-sessions"
+							]
+						},
+						"description": "Obtener historial de sesiones de entrenamiento."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de sesiones de entrenamiento (solo alumnos).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{student_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "👤 Student - Statistics",
+			"item": [
+				{
+					"name": "Get My Routine Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/statistics/routines",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"statistics",
+								"routines"
+							]
+						},
+						"description": "Obtener mis estadísticas de rutinas ejecutadas."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Exercise Weight History",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/statistics/exercise-weight-history?exercise_id={{exercise_id}}&reps=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"statistics",
+								"exercise-weight-history"
+							],
+							"query": [
+								{
+									"key": "exercise_id",
+									"value": "{{exercise_id}}",
+									"description": "ID del ejercicio"
+								},
+								{
+									"key": "reps",
+									"value": "10",
+									"description": "Número de repeticiones"
+								}
+							]
+						},
+						"description": "Obtener mi historial de pesos de un ejercicio.\n\n**IMPORTANTE (TASK_034):**\nSolo muestra registros donde el peso CAMBIÓ.\nNo aparecen entradas duplicadas con el mismo peso."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Executed Exercises",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/statistics/exercises-executed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"statistics",
+								"exercises-executed"
+							]
+						},
+						"description": "Obtener lista de mis ejercicios ejecutados."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Gym Active Students Count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/students/me/gyms/{{gym_id}}/statistics/active-students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"students",
+								"me",
+								"gyms",
+								"{{gym_id}}",
+								"statistics",
+								"active-students"
+							]
+						},
+						"description": "Obtener contador de alumnos activos en mi gimnasio (privacidad)."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de estadísticas (solo alumnos).",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{student_token}}",
+						"type": "string"
+					}
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api/v1",
+			"type": "string"
+		}
+	]
+}
