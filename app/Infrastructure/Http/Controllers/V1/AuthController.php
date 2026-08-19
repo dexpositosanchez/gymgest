@@ -314,20 +314,16 @@ class AuthController extends Controller
      */
     public function verify(Request $request, string $id, string $hash)
     {
-        // Validar signed URL
         if (!$request->hasValidSignature()) {
-            return redirect(config('app.frontend_url') . '/verification-failed?reason=invalid');
+            return response()->json(['error' => 'Enlace de verificación inválido o expirado'], 422);
         }
-
         try {
             $this->verifyEmailUseCase->execute($id, $hash);
-
-            return redirect(config('app.frontend_url') . '/verification-success');
-
+            return response()->json(['message' => 'Email verificado correctamente']);
         } catch (\DomainException $e) {
-            return redirect(config('app.frontend_url') . '/verification-failed?reason=not_found');
+            return response()->json(['error' => $e->getMessage()], 404);
         } catch (\Exception $e) {
-            return redirect(config('app.frontend_url') . '/verification-failed?reason=error');
+            return response()->json(['error' => 'Error al verificar email'], 500);
         }
     }
 
